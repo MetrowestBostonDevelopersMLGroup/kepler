@@ -10,7 +10,7 @@ app = Flask(__name__)
 def index():
     with open('data/products.json') as f:
         data = json.load(f)
-
+ 
     return render_template('index.html', products=data)
 
 
