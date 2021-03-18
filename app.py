@@ -7,6 +7,7 @@ import os
 from flask import jsonify, make_response
 from flask_swagger_ui import get_swaggerui_blueprint
 from routes import request_api
+from recommend import prepdata, movies
 
 app = Flask(__name__)
 
@@ -65,12 +66,29 @@ def hello_world():
 
 # index route
 # params
-@app.route("/")
+@app.route("/products")
 def index():
     with open('data/products.json') as f:
         data = json.load(f)
  
+    prepdata.load_data()
+
     return render_template('index.html', products=data)
+
+@app.route("/load")
+def load():    
+    app.data = prepdata.load_data()
+    return app.data.head(3).to_html()
+
+@app.route("/describe")
+def describe():    
+    data = prepdata.describe_data()
+    return data
+
+@app.route("/transform")
+def transform():    
+    data = prepdata.describe_data()
+    return data
 
 
 if __name__ == "__main__":

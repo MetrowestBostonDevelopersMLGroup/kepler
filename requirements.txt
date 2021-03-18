@@ -2,3 +2,6 @@
 Flask==1.0.2
 flask-swagger-ui
 validate_email
+pandas
+scipy
+sklearn
