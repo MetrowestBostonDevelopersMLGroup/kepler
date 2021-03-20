@@ -1,0 +1,7 @@
+{
+    "columns": {
+        "drop" : ["col3", "col4"],
+        "rename" : [{"col1":"name"}],
+        "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]
+    }
+}

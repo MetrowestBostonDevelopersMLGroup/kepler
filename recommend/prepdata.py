@@ -27,12 +27,12 @@ def load_data():
     data_movies['cast'] = data_movies['cast'].apply(get_list)
     data_movies['genres'] = data_movies['genres'].apply(get_list)
 
-    data_recommend = data_movies.drop(columns=['movie_id','original_title']) #,'plot'])
-    data_recommend = data_recommend[['genres', 'cast', 'title', 'overview']]
+    data_recommend = data_movies.drop(columns=['original_title']) #,'plot', 'movie_id'])
+    data_recommend = data_recommend[['genres', 'cast', 'title', 'overview', 'movie_id']]
 
     #data_recommend = data_movies.drop(columns=['movie_id', 'original_title','plot'])
     data_recommend['combine'] = data_recommend[data_recommend.columns[0:2]].apply(lambda x: ','.join(x.dropna().astype(str)),axis=1)
-    data_recommend = data_recommend.drop(columns=[ 'cast','genres'])
+    #data_recommend = data_recommend.drop(columns=[ 'cast','genres'])
 
     return data_recommend
 

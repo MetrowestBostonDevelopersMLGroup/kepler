@@ -8,8 +8,12 @@ from flask import jsonify, make_response
 from flask_swagger_ui import get_swaggerui_blueprint
 from routes import request_api
 from recommend import prepdata, movies
+from appManagement import session
+
+# git push origin main
 
 app = Flask(__name__)
+app.session = {'session1': session.Session(None, None, None)}
 
 @app.route('/static/<path:path>')
 def send_static(path):
@@ -77,18 +81,33 @@ def index():
 
 @app.route("/load")
 def load():    
-    app.data = prepdata.load_data()
-    return app.data.head(3).to_html()
+    app.session['session1'].dataPrep = prepdata.load_data()
+    return app.session['session1'].dataPrep.head(3).to_html()
 
 @app.route("/describe")
 def describe():    
-    data = prepdata.describe_data()
-    return data
+    #app.session['session1'].dataTransform = prepdata.describe_data(app.session['session1'].dataPrep)
+    #return app.session['session1'].dataTransform.head(3).to_html()
+    return 'not implemented'
 
 @app.route("/transform")
 def transform():    
-    data = prepdata.describe_data()
+    app.session['session1'].dataTransform = movies.transform_data(app.session['session1'].dataPrep)
+    return "data ready"
+
+#@app.route('/recommend/<string:movie_title>', methods=['GET'])
+@app.route("/recommend")
+def recommend():    #movie_title
+    movie_title = "Jaws"
+    data = movies.recommend_movies(movie_title, app.session['session1'].dataPrep, app.session['session1'].dataTransform)
     return data
+
+@app.route("/all")
+def all():    #movie_title
+    load()
+    transform()
+    data = recommend()
+    return data.to_html()
 
 
 if __name__ == "__main__":

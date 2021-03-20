@@ -16,12 +16,13 @@ def combine_data(data):
     data_recommend = data_recommend.drop(columns=[ 'cast','genres'])
     return data_recommend
 
-def transform_data(data_combine, data_plot):
+def transform_data(data_combine):
     count = CountVectorizer(stop_words='english')
     count_matrix = count.fit_transform(data_combine['combine'])
 
     tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(data_plot['plot'])
+    ##tfidf_matrix = tfidf.fit_transform(data_plot['plot'])
+    tfidf_matrix = tfidf.fit_transform(data_combine['overview'])
 
     combine_sparse = sp.hstack([count_matrix, tfidf_matrix], format='csr')
     
@@ -29,9 +30,10 @@ def transform_data(data_combine, data_plot):
     
     return cosine_sim
 
-def recommend_movies(title, data, combine, transform):
+def recommend_movies(title, combine, transform):
 
-    indices = pd.Series(data.index, index = data['original_title'])
+    #indices = pd.Series(data.index, index = data['original_title'])
+    indices = pd.Series(combine.index, index = combine['title'])
     index = indices[title]
 
     sim_scores = list(enumerate(transform[index]))
@@ -40,9 +42,12 @@ def recommend_movies(title, data, combine, transform):
     
     movie_indices = [i[0] for i in sim_scores]
 
-    movie_id = data['movie_id'].iloc[movie_indices]
-    movie_title = data['original_title'].iloc[movie_indices]
-    movie_genres = data['genres'].iloc[movie_indices]
+    #combine.columns
+    #Index(['genres', 'cast', 'title', 'overview', 'combine'], dtype='object')
+
+    movie_id = combine['movie_id'].iloc[movie_indices]
+    movie_title = combine['title'].iloc[movie_indices]
+    movie_genres = combine['genres'].iloc[movie_indices]
 
     recommendation_data = pd.DataFrame(columns=['Movie_Id','Name','Genres'])
 
@@ -52,7 +57,7 @@ def recommend_movies(title, data, combine, transform):
 
     return recommendation_data
 
-def results(movie_name):
+def recommend(movie_name, session):
     movie_name = movie_name.lower()
     
     find_movie = get_data()
