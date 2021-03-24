@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template, flash, request, redirect, url_for
 import json
 
 import argparse
@@ -9,10 +9,19 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from routes import request_api
 from recommend import prepdata, movies
 from appManagement import session
+from appManagement import configMgr as cmgr
+from engine import engine as eng
+from werkzeug.utils import secure_filename
 
 # git push origin main
 
+UPLOAD_FOLDER = '/upload'
+ALLOWED_EXTENSIONS = {'txt', 'csv'}
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# create a single session for all interaction (when developing locally)
 app.session = {'session1': session.Session(None, None, None)}
 
 @app.route('/static/<path:path>')
@@ -92,14 +101,14 @@ def describe():
 
 @app.route("/transform")
 def transform():    
-    app.session['session1'].dataTransform = movies.transform_data(app.session['session1'].dataPrep)
+    app.session['session1'].dataTransform = movies.analyze(app.session['session1'].dataPrep)
     return "data ready"
 
 #@app.route('/recommend/<string:movie_title>', methods=['GET'])
 @app.route("/recommend")
 def recommend():    #movie_title
-    movie_title = "Jaws"
-    data = movies.recommend_movies(movie_title, app.session['session1'].dataPrep, app.session['session1'].dataTransform)
+    movie_title = "Alien"
+    data = movies.recommend(movie_title, app.session['session1'].dataPrep, app.session['session1'].dataTransform)
     return data
 
 @app.route("/all")
@@ -108,6 +117,57 @@ def all():    #movie_title
     transform()
     data = recommend()
     return data.to_html()
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')            
+            return redirect(request.url)
+        updir = os.getcwd()+app.config['UPLOAD_FOLDER']
+        os.makedirs(updir, exist_ok=True)             
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(updir, filename))
+            return filename + ' has been uploaded.'
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
+
+@app.route("/loadsampleconfig")
+def loadSampleConfig():    #movie_title
+    config = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
+    res = config.LoadAndParse('./documentation/sample_describe.json')
+    aud = config.ValidateConfig()       
+    return aud
+    
+@app.route("/loadusmoviesconfig")
+def loadUSMoviesConfig():    #movie_title
+    config = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
+    res = config.LoadAndParse('./documentation/us_movies_db_config.json') #clean.json)
+    aud = config.ValidateConfig()    
+    recEngine = eng.Engine(config)
+    recEngine.Execute()
+
+    return aud    
+    #return config.GetAudit().MessagesAsHtmlTable()  #aud as json
 
 
 if __name__ == "__main__":

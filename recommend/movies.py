@@ -16,21 +16,32 @@ def combine_data(data):
     data_recommend = data_recommend.drop(columns=[ 'cast','genres'])
     return data_recommend
 
-def transform_data(data_combine):
-    count = CountVectorizer(stop_words='english')
-    count_matrix = count.fit_transform(data_combine['combine'])
+def analyze(data_combine):
 
-    tfidf = TfidfVectorizer(stop_words='english')
-    ##tfidf_matrix = tfidf.fit_transform(data_plot['plot'])
-    tfidf_matrix = tfidf.fit_transform(data_combine['overview'])
-
-    combine_sparse = sp.hstack([count_matrix, tfidf_matrix], format='csr')
+    # Count Vectorizer assigns a number to the frequency of the word within the corpus
+    countVec = CountVectorizer(stop_words='english')
+    wordCountMatrix = countVec.fit_transform(data_combine['combine'])
     
+    # dump the vectorized list
+    # pd.DataFrame(wordCountMatrix.toarray(), columns=countVec.get_feature_names())
+
+    # Term Frequency Inverse Document Frequency gives a 'weight' value indicating the 'orginality' of the word
+    tfidfVec = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidfVec.fit_transform(data_combine['overview'])
+
+    # dump the vector list
+    #term_vectors.todense()
+
+    # Stack sparse matrices horizontally
+    combine_sparse = sp.hstack([wordCountMatrix, tfidf_matrix], format='csr')
+    
+    # Cosine similarity is a metric used to determine how similar the documents are irrespective of their size.
+    # It measures the cosine of the angle between two vectors projected in a multi-dimensional space.
     cosine_sim = cosine_similarity(combine_sparse, combine_sparse)
     
     return cosine_sim
 
-def recommend_movies(title, combine, transform):
+def recommend(title, combine, transform):
 
     #indices = pd.Series(data.index, index = data['original_title'])
     indices = pd.Series(combine.index, index = combine['title'])

@@ -1,7 +1,22 @@
 {
-    "columns": {
-        "drop" : ["col3", "col4"],
-        "rename" : [{"col1":"name"}],
-        "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]
+    "files" : [
+        {
+            "filename" : "one.csv",
+            "na-filter": false,
+            "drop": ["col3", "col4"],
+            "rename" : [{"old": "new"}, {"col2":"address"}],
+            "workingColumns": [
+                {
+                    "header" : "title",
+                    "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]            
+                }
+            ]
+        } 
+    ],
+    "transform" : {
+
+    },
+    "analyze" : {
+
     }
 }

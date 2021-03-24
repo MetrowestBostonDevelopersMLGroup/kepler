@@ -1,0 +1,34 @@
+{
+    "files" : [
+        {
+            "filename" : "tmdb_5000_credits.csv",
+            "na-filter": true,
+            "drop": [],
+            "rename" : [{"col1": "name"}, {"col2":"address"}],
+            "workingColumns": [
+                {
+                    "header" : "title",
+                    "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]            
+                }
+            ]
+        },
+        {
+            "filename" : "tmdb_5000_movies.csv",
+            "na-filter": false,
+            "drop": ["tagline", "status", "homepage", "keywords","crew","vote_count", "vote_average", "tagline", "spoken_languages", "runtime", "popularity", "production_companies", "budget", "production_countries", "release_date", "revenue", "title_y", "original_language"],
+            "rename" : [{"col1": "name"}, {"col2":"address"}],
+            "workingColumns": [
+                {
+                    "header" : "title",
+                    "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]            
+                }
+            ]
+        }
+    ],
+    "transform" : {
+        "merge": {"from-filename": "tmdb_5000_credits.csv", "to-filename":"tmdb_5000_movies.csv", "on-column":"movie_id"}
+    },
+    "analyze" : {
+
+    }
+}
