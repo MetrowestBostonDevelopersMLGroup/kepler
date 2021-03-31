@@ -68,7 +68,7 @@ def recommend(title, combine, transform):
 
     return recommendation_data
 
-def recommend(movie_name, session):
+def recommend2(movie_name, session):
     movie_name = movie_name.lower()
     
     find_movie = get_data()

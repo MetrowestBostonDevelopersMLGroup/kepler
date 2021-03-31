@@ -1,3 +1,5 @@
+import uuid
+
 class Session:
 
   def __init__(self, dataPrep, dataTransform, dataReady):
@@ -10,3 +12,6 @@ class Session:
 
   def setDataReady(self, dataReady):
     self.dataReady = dataReady
+
+  def getNewSID(self):
+    return uuid.uuid4()
