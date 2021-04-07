@@ -35,7 +35,7 @@ class Audit:
     ERROR_TRANSFORM_SECTION_MERGE_MISSING_ON_COLUMN = msg.Message(5011, 'Transform section merge property is missing the on-column attribute.','Error')
 
     ERROR_WORKING_COLUMN_MISSING_HEADER_ATTRIBUTE = msg.Message(5012, 'Working column property is missing the header attribute.','Error')
-    ERROR_WORKING_COLUMN_IS_JSON_ATTRIBUTE = msg.Message(5013, 'Working column property is-json attribute should be a boolean.','Error')
+    ERROR_WORKING_COLUMN_IS_JSON_ATTRIBUTE = msg.Message(5013, 'Working column property is-json attribute should be a boolean or parsing error with associated attributes.','Error')
 
     ERROR_ANALYZE_SECTION_MISSING_VECTORIZERS = msg.Message(5014, 'Analyze section missing vectorize collection.','Error')
     ERROR_VECTORIZER_SECTION_MISSING_ID  = msg.Message(5015, 'Analyze section vectorize collection missing id attribute.','Error')
@@ -66,9 +66,14 @@ class Audit:
     ERROR_RECOMMEND_SECTION_MISSING_SOURCE_COLUMN = msg.Message(5035, 'The response-columns collection is missing the source attribute.','Error')
     ERROR_RECOMMEND_SECTION_MISSING_OUTPUT_COLUMN = msg.Message(5036, 'The response-columns collection is missing the output attribute.','Error')
 
+    ERROR_WORKING_COLUMN_MISSING_SEPARATOR_ATTRIBUTE = msg.Message(5037, 'Working column property is missing the separator attribute for this delimited defined column.','Error')
+    ERROR_WORKING_COLUMN_IS_DELIM_ATTRIBUTE = msg.Message(5038, 'Working column property is-delim attribute should be a boolean or parsing error with associated attributes.','Error')
 
     def __init__(self):
         pass
+
+    def ClearMessages(self):
+        self.messages = []
 
     def AddMessage(self, message, extra):
         if (message.level =='Error'):

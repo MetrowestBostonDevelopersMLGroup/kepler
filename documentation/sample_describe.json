@@ -1,17 +1,32 @@
 {
     "files" : [
-        {
-            "filename" : "one.csv",
-            "na-filter": false,
-            "drop": ["col3", "col4"],
-            "rename" : [{"old": "new"}, {"col2":"address"}],
-            "workingColumns": [
-                {
-                    "header" : "title",
-                    "type" : [{"name":"str|int|float|complex|bool|bytes"}, {"col2":"json"}]            
-                }
-            ]
-        } 
+            {
+                "filename" : "gene.csv",
+                "na-filter": true,
+                "workingColumns": [
+                    {
+                        "header" : "movie_id",
+                        "is-json" : false
+                    },
+                    {
+                        "header" : "title",
+                        "is-json" : false
+                    },
+                    {
+                        "header" : "cast",
+                        "is-json" : true,
+                        "extract-element" : "name",
+                        "item-count": 3
+                    },
+                    {
+                        "header" : "crew",
+                        "is-json" : true
+                    }
+                ],
+                "drop": [],
+                "rename" : [{"movie_id": "id"}],
+                "combineColumns" : []
+            }
     ],
     "transform" : {
 

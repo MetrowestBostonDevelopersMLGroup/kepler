@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"> -->
+  <title>Configuration Editor</title>
+</head>
+
+<body>
+  <form method=post enctype=multipart/form-data>
+  <div id="app">
+    <header>
+      <div class="container">
+        <div class="hero is-info is-bold">
+          <div class="hero-body">
+            <h2 class="is-size-1">Configuration Editor</h2>
+            <h3>{{editor.filename}}</h3>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="section">
+        <div class="container">
+        <div>
+            Choose a configuration file: <SELECT name="files">
+                {% for c in editor.files %}
+                    <OPTION value="{{c.id}}" {% if c.name == editor.file_basename %}selected="selected"{% endif %} >{{c.name}}</option>
+                {% endfor %}
+                </SELECT>
+            <input type=submit value=selectFile>
+        </div>
+        <div>
+            <textarea name="editor" rows="30" cols="120">{{editor.config}}</textarea>
+        </div>
+        <input type=submit value=Parse>
+        <input type="checkbox" id="nowarnings" name="nowarnings" value="novalue"> <label for="nowarnings"> Hide Warnings</label>
+        <div>
+            <textarea name="audit" rows="15" cols="120">{{editor.audit}}</textarea>
+        </div>        
+    </section>
+  </div>
+  </form>
+</body>
+
+</html>

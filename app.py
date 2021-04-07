@@ -1,12 +1,12 @@
 from flask import Flask
 from flask import render_template, flash, request, redirect, url_for
-import json
+import json, pathlib
 
 import argparse
 import os
 from flask import jsonify, make_response
 from flask_swagger_ui import get_swaggerui_blueprint
-from routes import request_api
+from routes import kepler_api
 from recommend import prepdata, movies
 from appManagement import session
 from appManagement import configMgr as cmgr
@@ -16,13 +16,26 @@ from werkzeug.utils import secure_filename
 # git push origin main
 
 UPLOAD_FOLDER = '/upload'
-ALLOWED_EXTENSIONS = {'txt', 'csv'}
+ALLOWED_EXTENSIONS = {'txt', 'csv', 'cfg'}
+
 
 app = Flask(__name__)
+
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'memcached'
+#sess.init_app(app)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.sessions = []
 
 # create a single session for all interaction (when developing locally)
 app.session = {'session1': session.Session(None, None, None)}
+
+app.current_editor_file_id = None
+app.current_filename = None
+app.current_filename_basename = None
+
+app.configMgr = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
 
 @app.route('/static/<path:path>')
 def send_static(path):
@@ -41,7 +54,7 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 ### end swagger specific ###
 
-app.register_blueprint(request_api.get_blueprint())
+app.register_blueprint(kepler_api.get_blueprint())
 
 @app.errorhandler(400)
 def handle_400_error(_error):
@@ -76,7 +89,6 @@ def hello():
 def hello_world():
    return "hello world"
 
-
 # index route
 # params
 @app.route("/products")
@@ -107,7 +119,7 @@ def transform():
 #@app.route('/recommend/<string:movie_title>', methods=['GET'])
 @app.route("/recommend")
 def recommend():    #movie_title
-    movie_title = "Alien"
+    movie_title = "The Sting"
     data = movies.recommend(movie_title, app.session['session1'].dataPrep, app.session['session1'].dataTransform)
     return data
 
@@ -169,6 +181,74 @@ def loadUSMoviesConfig():    #movie_title
     return aud    
     #return config.GetAudit().MessagesAsHtmlTable()  #aud as json
 
+@app.route('/editconfig', methods=['GET', 'POST'])
+def editconfig_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        #if 'file' not in request.files:
+        #    flash('No file part')
+        #    return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')            
+            return redirect(request.url)
+        updir = os.getcwd()+app.config['UPLOAD_FOLDER']
+        os.makedirs(updir, exist_ok=True)             
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(updir, filename))
+            return filename + ' has been uploaded.'
+    
+    with open('./documentation/us_movies_db_config.json') as f:
+        content = f.read()
+    parsed_json = json.loads(content)
+    data = {'config':content}
+    return render_template('configeditor.html', editor=data)
+
+@app.route("/config_editor", methods=['GET', 'POST'])
+def cfg_editor():
+    if request.method == 'POST':    
+        if request.form['files'] != app.current_editor_file_id:
+            # open up the file that is selected
+            app.current_filename = app.config_files[int (request.form['files'])-1]['name']
+            app.current_filename_basename = os.path.basename(app.current_filename)
+            filename = os.getcwd()+app.config['UPLOAD_FOLDER']+'/'+ app.current_filename
+            with open(filename) as f:
+                content = f.read()
+                parsed_json = json.loads(content)
+            app.current_editor_file_id = request.form['files']
+            app.current_filename = filename
+            data = {'filename':app.current_filename,'config':content, 'files':app.config_files, 'audit':'', 'file_basename':app.current_filename_basename}
+            return render_template('configeditor.html', editor=data)
+        else:
+            # parse the existing file
+            content = app.configMgr.Parse(request.form['editor'])
+            audit = json.dumps(app.configMgr.GetAudit(), indent = 4, default=lambda o: o.__dict__)
+            if request.form.get('nowarnings') != None:
+                audit = [x for x in app.configMgr.GetAudit() if x.level == 'Error']
+                audit = json.dumps(app.configMgr.GetAudit(), indent = 4, default=lambda o: o.__dict__)
+            data = {'filename':app.current_filename,'config':content, 'files':app.config_files, 'audit':audit, 'file_basename':app.current_filename_basename}
+            return render_template('configeditor.html', editor=data)
+
+    content = ''
+    filename = ''
+
+    updir = os.getcwd()+app.config['UPLOAD_FOLDER']
+    os.makedirs(updir, exist_ok=True)  
+    files = os.listdir(updir)
+
+    app.config_files = []
+    id = 1
+    for f in files:
+        file_extension = pathlib.Path(f).suffix
+        if (file_extension == '.cfg'):
+            app.config_files.append({'id':id,'name':f})
+            id = id +1
+
+    data = {'filename':filename,'config':content, 'files':app.config_files}
+    return render_template('configeditor.html', editor=data)
 
 if __name__ == "__main__":
     app.run(debug=True)

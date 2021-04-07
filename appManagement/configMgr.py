@@ -20,7 +20,8 @@ class ConfigMgr:
         self.uploadFolder = uploadFolder
         self.audit = au.Audit()
 
-    def LoadAndParse(self, configJson):        
+    def LoadAndParse(self, configJson):       
+        self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         with open(configJson) as f:
             content = f.read()
@@ -30,6 +31,19 @@ class ConfigMgr:
         self.ParseAnalyze()
         self.ParseRecommend()
         return content
+
+    def Parse(self, content):       
+        self.audit.ClearMessages() 
+        self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
+        self.parsed_json = json.loads(content)
+        self.LoadAndParseDataFiles()
+        self.ParseTransform()
+        self.ParseAnalyze()
+        self.ParseRecommend()
+        return content
+
+    def GetAudit(self):
+        return self.audit.messages
 
     def LoadAndParseDataFiles(self):
         files = []
@@ -185,7 +199,7 @@ class ConfigMgr:
         return json.dumps(self.audit.messages, indent = 4, default=lambda o: o.__dict__)
 
     def GetAudit(self):
-        return self.audit
+        return self.audit.messages
         
     def GetDataFileFromFilename(self, filename):
         files = [item for item in self.filesObj if item.GetFilename() == filename]

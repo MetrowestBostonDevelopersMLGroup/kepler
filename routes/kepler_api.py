@@ -1,16 +1,20 @@
 """The Endpoints to manage the BOOK_REQUESTS"""
 import uuid
 from datetime import datetime, timedelta
-from flask import jsonify, abort, request, Blueprint
+from flask import jsonify, abort, request, Blueprint, current_app, flash, redirect
+from appManagement import session as sess
+import argparse
+import os
+from werkzeug.utils import secure_filename
 
 from validate_email import validate_email
 
-REQUEST_API = Blueprint('request_api', __name__)
+KEPLER_API = Blueprint('kepler_api', __name__)
 
 
 def get_blueprint():
     """Return the blueprint for the main app module"""
-    return REQUEST_API
+    return KEPLER_API
 
 
 BOOK_REQUESTS = {
@@ -26,17 +30,26 @@ BOOK_REQUESTS = {
     }
 }
 
+@KEPLER_API.route('/v1/session', methods=['POST'])
+def get_session():
+    """Creates and returns a unique session identifier
+    @return: 200: a UUID identifying the session handle
+    """    
+    sessionObj = sess.Session(None,None,None)
+    sid = sessionObj.getNewSID()
+    current_app.sessions.append(sid)
+    return jsonify(sid)
 
-@REQUEST_API.route('/v1/request', methods=['GET'])
-def get_records():
+@KEPLER_API.route('/v1/session', methods=['GET'])
+def get_sessions():
     """Return all book requests
-    @return: 200: an array of all known BOOK_REQUESTS as a \
+    @return: 200: an array of all sessions as a \
     flask/response object with application/json mimetype.
     """
-    return jsonify(BOOK_REQUESTS)
+    return jsonify(current_app.sessions)
 
 
-@REQUEST_API.route('/v1/request/<string:_id>', methods=['GET'])
+@KEPLER_API.route('/v1/request/<string:_id>', methods=['GET'])
 def get_record_by_id(_id):
     """Get book request details by it's id
     @param _id: the id
@@ -49,7 +62,7 @@ def get_record_by_id(_id):
     return jsonify(BOOK_REQUESTS[_id])
 
 
-@REQUEST_API.route('/v1/request', methods=['POST'])
+@KEPLER_API.route('/v1/request', methods=['POST'])
 def create_record():
     """Create a book request record
     @param email: post : the requesters email address
@@ -80,7 +93,7 @@ def create_record():
     return jsonify({"id": new_uuid}), 201
 
 
-@REQUEST_API.route('/v1/request/<string:_id>', methods=['PUT'])
+@KEPLER_API.route('/v1/request/<string:_id>', methods=['PUT'])
 def edit_record(_id):
     """Edit a book request record
     @param email: post : the requesters email address
@@ -113,7 +126,7 @@ def edit_record(_id):
     return jsonify(BOOK_REQUESTS[_id]), 200
 
 
-@REQUEST_API.route('/v1/request/<string:_id>', methods=['DELETE'])
+@KEPLER_API.route('/v1/request/<string:_id>', methods=['DELETE'])
 def delete_record(_id):
     """Delete a book request record
     @param id: the id
@@ -126,3 +139,4 @@ def delete_record(_id):
     del BOOK_REQUESTS[_id]
 
     return '', 204
+

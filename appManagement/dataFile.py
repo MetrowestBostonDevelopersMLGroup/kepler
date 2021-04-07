@@ -67,6 +67,24 @@ class DataFile:
                 except Exception as ex:
                     self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_IS_JSON_ATTRIBUTE, ex)
 
+                try:
+                    if 'is-delim' in work:
+                        workObj.isDelim = self.to_bool(work['is-delim'])
+
+                        if workObj.isDelim:
+                            if not 'separator' in work:
+                                self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_MISSING_SEPARATOR_ATTRIBUTE,workObj.header)
+                            else:
+                                workObj.separator = work['separator']  
+
+                            if not 'item-count' in work:
+                                self.audit.AddMessage(au.Audit.WARNING_WORKING_COLUMN_MISSING_ITEM_COUNT_ATTRIBUTE,workObj.header)
+                            else:
+                                workObj.itemCount = work['item-count']                                  
+
+                except Exception as ex:
+                    self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_IS_DELIM_ATTRIBUTE, ex)
+
                 self.workingColumns.append(workObj)
         
         if 'combineColumns' in self.jsonObj:
@@ -154,7 +172,12 @@ class DataFile:
             if workCol.isJson:
                 if workCol.extractElement is not None and workCol.itemCount is not None:
                     self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list(x, workCol.itemCount,workCol.extractElement))
-    
+                    continue
+            if workCol.isDelim:
+                if workCol.separator is not None and workCol.itemCount is not None:
+                    self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list_delim(x, workCol.itemCount,workCol.separator))
+                    continue
+
     def DropColumns(self):        
         try:
             if 'drop' in self.jsonObj:
@@ -210,6 +233,11 @@ class DataFile:
         except Exception:
             return []
         return []
+
+    def get_list_delim(self, cellData, returnCount, separator):
+        as_list = cellData.split(separator)
+        as_list = as_list[:returnCount]
+        return as_list
 
     def OrderWorkingFiles(self):
         # do similar to: data_credits = data_credits[['movie_id','title','cast','crew']]
