@@ -29,12 +29,12 @@
                     <OPTION value="{{c.id}}" {% if c.name == editor.file_basename %}selected="selected"{% endif %} >{{c.name}}</option>
                 {% endfor %}
                 </SELECT>
-            <input type=submit value=selectFile>
+            <input type=submit value=Select>
         </div>
         <div>
             <textarea name="editor" rows="30" cols="120">{{editor.config}}</textarea>
         </div>
-        <input type=submit value=Parse>
+        <input type=submit value="Save & Parse">
         <input type="checkbox" id="nowarnings" name="nowarnings" value="novalue"> <label for="nowarnings"> Hide Warnings</label>
         <div>
             <textarea name="audit" rows="15" cols="120">{{editor.audit}}</textarea>

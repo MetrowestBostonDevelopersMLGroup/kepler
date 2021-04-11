@@ -9,6 +9,8 @@ class Engine:
     configurationMgr = None
     transform = None
     analyze = None
+    similarity = None
+    finalDataObj = None
 
     def __init__(self, configurationManager):
         self.configurationMgr = configurationManager
@@ -22,13 +24,17 @@ class Engine:
             file.LoadData()
             self.transform.TransformDataFile(file)
         
-        finalDataObj = self.transform.MergeDataFiles(self.configurationMgr)
+        self.finalDataObj = self.transform.MergeDataFiles(self.configurationMgr)
 
         for file in files:
             file.CombineColumns()        
 
-        similarity = self.analyze.VectorizeAndSimilarity(self.configurationMgr, finalDataObj)
+        self.similarity = self.analyze.VectorizeAndSimilarity(self.configurationMgr, self.finalDataObj)
 
-        recommendation = self.analyze.Recommend(self.configurationMgr, finalDataObj.data, self.configurationMgr.recommend.requestColumn,'Aliens')
+        return self.similarity
+
+    def Recommendation(self, request):
+
+        recommendation = self.analyze.Recommend(self.configurationMgr, self.finalDataObj.data, self.configurationMgr.recommend.requestColumn, request) #'Amavas') #'Aliens')
 
         return recommendation

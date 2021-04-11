@@ -1,0 +1,91 @@
+{
+    "files" : [
+        {
+            "filename" : "tmdb_5000_credits.csv",
+            "na-filter": true,
+            "workingColumns": [
+                {
+                    "header" : "movie_id",
+                    "is-json" : false
+                },
+                {
+                    "header" : "title",
+                    "is-json" : false
+                },
+                {
+                    "header" : "cast",
+                    "is-json" : true,
+                    "extract-element" : "name",
+                    "item-count": 3
+                },
+                {
+                    "header" : "crew",
+                    "is-json" : true
+                }
+            ],
+            "drop": [],
+            "rename" : [{"movie_id": "id"}],
+            "combineColumns" : []
+        },
+        {
+            "filename" : "tmdb_5000_movies.csv",
+            "na-filter": false,
+            "workingColumns": [
+                {                    
+                    "header" : "id",
+                    "is-json" : false
+                },
+                {
+                    "header" : "genres",
+                    "is-json" : true,
+                    "extract-element" : "name",
+                    "item-count": 3
+                },
+                {
+                    "header" : "overview",
+                    "is-json" : false
+                }                
+            ],
+            "drop": ["tagline", "status", "homepage", "keywords","crew","vote_count", "vote_average", "tagline", "spoken_languages", "runtime", "popularity", "production_companies", "budget", "production_countries", "release_date", "revenue", "title_y", "original_language"],
+            "rename" : [],
+            "combineColumns" : [
+                {
+                    "combine-header": "combine",
+                    "column1" : "cast",
+                    "column2" : "genres",
+                    "item-count": 3,
+                    "drop-source-columns": true
+                }
+            ]
+        }
+    ],
+    "transform" : {
+        "merge": {"from-filename": "tmdb_5000_credits.csv", "to-filename":"tmdb_5000_movies.csv", "on-column":"id"}
+    },
+    "analyze" : {
+        "vectorizers" : [
+            { "id": "countVec", "vectorizer": "count", "stop-words":"english", "column": "combine"},
+            { "id": "tfidfVec", "vectorizer": "tfidf", "stop-words":"english", "column": "overview"}
+        ],
+        "sparse-stack": [
+            {
+                "id" : "sparse",
+                "stack-type" : "hstack",
+                "format" : "csr",
+                "vectorized-matrix-ids" : ["countVec","tfidfVec"]
+            }            
+        ],
+        "metrics": {
+            "similarity" : "cosine"
+        }
+    },
+    "recommend" : {
+        "request-column" : "title",
+        "response-count" : 20,
+        "response-columns" : [
+            {"source": "id", "output":"Movie_ID" },
+            {"source":"title", "output":"Name"},
+            {"source":"genres","output":"Genres"}
+        ]
+    }
+}

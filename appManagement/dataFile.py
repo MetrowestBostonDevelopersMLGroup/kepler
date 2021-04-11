@@ -167,7 +167,7 @@ class DataFile:
             titles.append(work['header'])
         return titles
 
-    def WorkingColumnsConvertJson(self): 
+    def WorkingColumnsConvertCompoundField(self): 
         for workCol in self.workingColumns:
             if workCol.isJson:
                 if workCol.extractElement is not None and workCol.itemCount is not None:
@@ -235,10 +235,14 @@ class DataFile:
         return []
 
     def get_list_delim(self, cellData, returnCount, separator):
-        as_list = cellData.split(separator)
-        as_list = as_list[:returnCount]
-        return as_list
-
+        try:
+            as_list = cellData.split(separator)
+            as_list = as_list[:returnCount]
+            return as_list
+        except Exception:
+            return []
+        return []
+        
     def OrderWorkingFiles(self):
         # do similar to: data_credits = data_credits[['movie_id','title','cast','crew']]
         self.data = self.data[self.WorkingColumnHeaders()]        

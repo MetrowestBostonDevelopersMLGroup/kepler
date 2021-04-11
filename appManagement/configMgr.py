@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+from flask import jsonify
 from appManagement import dataFile as df
 from appManagement import transformInstructions as ti
 from appManagement import analyzeInstructions as vi
@@ -25,25 +26,42 @@ class ConfigMgr:
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         with open(configJson) as f:
             content = f.read()
-        self.parsed_json = json.loads(content)
+        try:
+            self.parsed_json = json.loads(content)
+        except json.JSONDecodeError as ex:
+            self.audit.AddMessage(au.Audit.ERROR_JSON_PARSE, ex.msg+' line:'+str(ex.lineno)+' col:'+str(ex.colno))
+            return content, False
+
         self.LoadAndParseDataFiles()
         self.ParseTransform()
         self.ParseAnalyze()
         self.ParseRecommend()
-        return content
+        return content, True
 
     def Parse(self, content):       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
-        self.parsed_json = json.loads(content)
+        
+        try:
+            self.parsed_json = json.loads(content)
+        except json.JSONDecodeError as ex:
+            self.audit.AddMessage(au.Audit.ERROR_JSON_PARSE, ex.msg+' line:'+str(ex.lineno)+' col:'+str(ex.colno))
+            return content, False
+
         self.LoadAndParseDataFiles()
         self.ParseTransform()
         self.ParseAnalyze()
         self.ParseRecommend()
-        return content
+        return content, True
 
     def GetAudit(self):
         return self.audit.messages
+
+    def IsAuditError(self):
+        audit = [x for x in self.GetAudit() if x.level == 'Error']
+        if len(audit) > 0:
+            return True
+        return False
 
     def LoadAndParseDataFiles(self):
         files = []
@@ -197,12 +215,14 @@ class ConfigMgr:
             file.IsFileAvailable()
 
         return json.dumps(self.audit.messages, indent = 4, default=lambda o: o.__dict__)
-
-    def GetAudit(self):
-        return self.audit.messages
-        
+       
     def GetDataFileFromFilename(self, filename):
         files = [item for item in self.filesObj if item.GetFilename() == filename]
         return files[0]
+
+    def GetRequestColumnName(self):
+        if self.recommend is not None:
+            return self.recommend.requestColumn 
+        return ''
 
     

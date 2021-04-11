@@ -5,7 +5,7 @@ class Transform:
     def TransformDataFile(self, dataFile):
         dataFile.OrderWorkingFiles()
         dataFile.DropColumns()
-        dataFile.WorkingColumnsConvertJson()
+        dataFile.WorkingColumnsConvertCompoundField()
         dataFile.RenameColumns()
 
     def MergeDataFiles(self, configMgr):        

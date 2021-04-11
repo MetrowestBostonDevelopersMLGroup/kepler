@@ -69,6 +69,8 @@ class Audit:
     ERROR_WORKING_COLUMN_MISSING_SEPARATOR_ATTRIBUTE = msg.Message(5037, 'Working column property is missing the separator attribute for this delimited defined column.','Error')
     ERROR_WORKING_COLUMN_IS_DELIM_ATTRIBUTE = msg.Message(5038, 'Working column property is-delim attribute should be a boolean or parsing error with associated attributes.','Error')
 
+    ERROR_JSON_PARSE = msg.Message(50389, 'Critical error attempting to parse the JSON configuration file.','Error')
+
     def __init__(self):
         pass
 

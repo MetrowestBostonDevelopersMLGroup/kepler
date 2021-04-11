@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <title>Recommendations</title>
+</head>
+
+<body>
+  <form method=post enctype=multipart/form-data>
+  <div id="app">
+    <header>
+      <div class="container">
+        <div class="hero is-info is-bold">
+          <div class="hero-body">
+            <h1 class="is-size-1">Recommendations</h1>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="section">
+      <div class="container">
+        <div>
+          <div>
+            Choose a configuration file: <SELECT name="files">
+                {% for c in recommend.files %}
+                    <OPTION value="{{c.id}}" {% if c.name == recommend.file_basename %}selected="selected"{% endif %} >{{c.name}}</option>
+                {% endfor %}
+                </SELECT>
+            <input type=submit value=Select>
+            {{recommend.parse_error}}
+            <p></p>
+            <label for="userinput">Enter {{recommend.requestColumn}} to recommend:</label>
+            <input type="text" id="userinput" name="userinput" value={{recommend.searchValue}}>
+            <input type=submit value=Recommend!>
+        </div>   
+          <br>
+          {% for table in recommend.tables %}
+            {{recommend.titles[loop.index]}}
+            {{ table|safe }}
+          {% endfor %}
+
+        </div>
+    </section>
+  </div>
+</form>
+</body>
+
+</html>

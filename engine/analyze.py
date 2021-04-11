@@ -38,7 +38,10 @@ class Analyze:
     def Recommend(self, configMgr, workingData, columnName, request):
 
         indices = pd.Series(workingData.index, index = workingData[columnName])
-        index = indices[request]
+        try:
+            index = indices[request]
+        except Exception as ex:
+            return pd.DataFrame([]), False
 
         sim_scores = list(enumerate(self.similarity[index]))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -57,4 +60,4 @@ class Analyze:
         for column in configMgr.recommend.responseColumns:
             recommendation_data[column.outputColumn] = response[column.sourceColumn]
 
-        return recommendation_data        
+        return recommendation_data, True        

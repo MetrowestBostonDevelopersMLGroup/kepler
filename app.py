@@ -34,6 +34,12 @@ app.session = {'session1': session.Session(None, None, None)}
 app.current_editor_file_id = None
 app.current_filename = None
 app.current_filename_basename = None
+app.parseError = None
+app.readyToRecommendMessage = None
+app.current_config = None
+app.current_requestColumn = None
+app.current_searchValue = None
+app.recEngine = None
 
 app.configMgr = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
 
@@ -98,7 +104,7 @@ def index():
  
     prepdata.load_data()
 
-    return render_template('index.html', products=data)
+    return render_template('recommend.html', products=data)
 
 @app.route("/load")
 def load():    
@@ -177,9 +183,21 @@ def loadUSMoviesConfig():    #movie_title
     aud = config.ValidateConfig()    
     recEngine = eng.Engine(config)
     recEngine.Execute() 
-
-    return aud    
+    result = recEngine.Recommendation('Aliens')
+    return result.to_html()    
     #return config.GetAudit().MessagesAsHtmlTable()  #aud as json
+
+@app.route("/loadindianmoviesconfig")
+def loadIndianMoviesConfig():    #movie_title
+    config = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
+    res = config.LoadAndParse('./documentation/indian_movies_db_config.json') 
+    aud = config.ValidateConfig()    
+    recEngine = eng.Engine(config)
+    recEngine.Execute() 
+    result = recEngine.Recommendation('Amavas')
+    return result.to_html()    
+    #return config.GetAudit().MessagesAsHtmlTable()  #aud as json
+
 
 @app.route('/editconfig', methods=['GET', 'POST'])
 def editconfig_file():
@@ -223,8 +241,15 @@ def cfg_editor():
             data = {'filename':app.current_filename,'config':content, 'files':app.config_files, 'audit':'', 'file_basename':app.current_filename_basename}
             return render_template('configeditor.html', editor=data)
         else:
-            # parse the existing file
-            content = app.configMgr.Parse(request.form['editor'])
+            # save and parse the existing file
+            content, isParsed = app.configMgr.Parse(request.form['editor'])
+            if isParsed == True and app.current_filename_basename and allowed_file(app.current_filename_basename):
+                filename = secure_filename(app.current_filename_basename)
+                updir = os.getcwd()+app.config['UPLOAD_FOLDER']
+                file = open(os.path.join(updir, app.current_filename_basename), 'w')
+                file.write(content)
+                file.close()
+
             audit = json.dumps(app.configMgr.GetAudit(), indent = 4, default=lambda o: o.__dict__)
             if request.form.get('nowarnings') != None:
                 audit = [x for x in app.configMgr.GetAudit() if x.level == 'Error']
@@ -234,6 +259,14 @@ def cfg_editor():
 
     content = ''
     filename = ''
+    app.current_editor_file_id = None
+    app.current_filename = None
+    app.current_filename_basename = None
+    app.current_requestColumn = None
+    app.parseError = None
+    app.current_config = None
+    app.recEngine = None
+    app.current_searchValue = None
 
     updir = os.getcwd()+app.config['UPLOAD_FOLDER']
     os.makedirs(updir, exist_ok=True)  
@@ -249,6 +282,65 @@ def cfg_editor():
 
     data = {'filename':filename,'config':content, 'files':app.config_files}
     return render_template('configeditor.html', editor=data)
+
+@app.route("/recommender", methods=['GET', 'POST'])
+def recommender():
+    if request.method == 'POST':    
+        if request.form['files'] != app.current_editor_file_id:
+            # open up the file that is selected
+            app.current_filename = app.config_files[int (request.form['files'])-1]['name']
+            app.current_filename_basename = os.path.basename(app.current_filename)
+            filename = os.getcwd()+app.config['UPLOAD_FOLDER']+'/'+ app.current_filename
+            app.current_editor_file_id = request.form['files']
+            app.current_filename = filename
+
+            app.current_config = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
+            content, isParsed = app.current_config.LoadAndParse(filename) 
+            app.parseError = app.current_config.IsAuditError()
+            if app.parseError is not True:
+                app.recEngine = eng.Engine(app.current_config)
+                app.recEngine.Execute() 
+                app.current_requestColumn = app.current_config.GetRequestColumnName()
+                app.readyToRecommendMessage = 'Configuration is parsed without errors. The analysis is complete. Ready to recommend!'
+            else:
+                app.readyToRecommendMessage = 'Configuration is parsed with errors. The analysis can not proceed complete and recommendations can not be made.'
+
+            data = {'filename':app.current_filename,'config':content, 'files':app.config_files, 'audit':'', 'file_basename':app.current_filename_basename, 'parse_error':app.readyToRecommendMessage , 'tables':[],'titles':[], 'requestColumn': app.current_requestColumn,'searchValue':'' }
+            return render_template('recommend.html', recommend=data)
+        else:
+            # try a recommendation
+            prompt = request.form.get('userinput')
+            app.current_searchValue = prompt
+            result, isRecommendSuccess = app.recEngine.Recommendation(prompt)
+            resulthtml = result.to_html()  
+            numpy = result.to_numpy() 
+            asstring =  result.to_string().replace('\n','<br>')
+            data = {'filename':app.current_filename,'config':'', 'files':app.config_files, 'audit':'', 'file_basename':app.current_filename_basename, 'parse_error':app.readyToRecommendMessage, 'tables':[result.to_html(classes='data')], 'titles':result.columns.values, 'requestColumn': app.current_requestColumn, 'searchValue':app.current_searchValue}
+            return render_template('recommend.html', recommend=data)
+
+    content = ''
+    filename = ''
+    app.current_editor_file_id = None
+    app.current_filename = None
+    app.current_filename_basename = None
+    app.parseError = None
+    app.current_config = None
+    app.current_requestColumn = None
+    app.current_searchValue = None
+    app.recEngine = None
+    updir = os.getcwd()+app.config['UPLOAD_FOLDER']
+    os.makedirs(updir, exist_ok=True)  
+    files = os.listdir(updir)
+    app.config_files = []
+    id = 1
+    for f in files:
+        file_extension = pathlib.Path(f).suffix
+        if (file_extension == '.cfg'):
+            app.config_files.append({'id':id,'name':f})
+            id = id +1
+
+    data = {'filename':filename,'config':content, 'files':app.config_files, 'tables':[],'titles':[], 'requestColumn': '','searchValue':''}
+    return render_template('recommend.html', recommend=data)
 
 if __name__ == "__main__":
     app.run(debug=True)
