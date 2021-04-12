@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import pandas as pd
 from appManagement import message as mes
 from appManagement import audit as au
@@ -81,9 +82,25 @@ class DataFile:
                                 self.audit.AddMessage(au.Audit.WARNING_WORKING_COLUMN_MISSING_ITEM_COUNT_ATTRIBUTE,workObj.header)
                             else:
                                 workObj.itemCount = work['item-count']                                  
-
                 except Exception as ex:
                     self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_IS_DELIM_ATTRIBUTE, ex)
+
+                try:
+                    if 'is-regex' in work:
+                        workObj.isRegex = self.to_bool(work['is-regex'])
+
+                        if workObj.isRegex:
+                            if not 'expression' in work:
+                                self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_MISSING_EXPRESSION_ATTRIBUTE,workObj.header)
+                            else:
+                                workObj.expression = work['expression']  
+
+                            if not 'item-count' in work:
+                                self.audit.AddMessage(au.Audit.WARNING_WORKING_COLUMN_MISSING_ITEM_COUNT_ATTRIBUTE,workObj.header)
+                            else:
+                                workObj.itemCount = work['item-count']       
+                except Exception as ex:
+                    self.audit.AddMessage(au.Audit.ERROR_WORKING_COLUMN_IS_REGEX_ATTRIBUTE, ex)
 
                 self.workingColumns.append(workObj)
         
@@ -171,12 +188,16 @@ class DataFile:
         for workCol in self.workingColumns:
             if workCol.isJson:
                 if workCol.extractElement is not None and workCol.itemCount is not None:
-                    self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list(x, workCol.itemCount,workCol.extractElement))
+                    self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list_json(x, workCol.itemCount,workCol.extractElement))
                     continue
             if workCol.isDelim:
                 if workCol.separator is not None and workCol.itemCount is not None:
                     self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list_delim(x, workCol.itemCount,workCol.separator))
                     continue
+            if workCol.isRegex:
+                if workCol.expression is not None and workCol.itemCount is not None:
+                    self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list_regex(x, workCol.itemCount,workCol.expression))
+                    continue                
 
     def DropColumns(self):        
         try:
@@ -221,7 +242,7 @@ class DataFile:
 
         return [] # actually perform the combine operation
 
-    def get_list(self, jsonData, returnCount, attributeName):       
+    def get_list_json(self, jsonData, returnCount, attributeName):       
         try:
             if isinstance(jsonData, str):        
                 parsed_json = json.loads(jsonData)
@@ -242,7 +263,16 @@ class DataFile:
         except Exception:
             return []
         return []
-        
+
+    def get_list_regex(self, cellData, returnCount, expression):  # r"\(u'(.*?)',\)"
+        try:
+            as_list = re.findall(expression, cellData) 
+            as_list = as_list[:returnCount]
+            return as_list
+        except Exception:
+            return []
+        return []
+
     def OrderWorkingFiles(self):
         # do similar to: data_credits = data_credits[['movie_id','title','cast','crew']]
         self.data = self.data[self.WorkingColumnHeaders()]        

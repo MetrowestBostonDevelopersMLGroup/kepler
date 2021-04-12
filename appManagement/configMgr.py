@@ -20,6 +20,11 @@ class ConfigMgr:
     def __init__(self, uploadFolder):
         self.uploadFolder = uploadFolder
         self.audit = au.Audit()
+        self.parsed_json = None
+        self.filesObj = []
+        self.transform = None
+        self.analyze = None
+        self.recommend = None
 
     def LoadAndParse(self, configJson):       
         self.audit.ClearMessages() 

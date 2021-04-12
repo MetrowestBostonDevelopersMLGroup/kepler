@@ -16,6 +16,8 @@ class Engine:
         self.configurationMgr = configurationManager
         self.transform = xf.Transform()
         self.analyze = az.Analyze()
+        self.similarity = None
+        self.finalDataObj = None
 
     def Execute(self):
         

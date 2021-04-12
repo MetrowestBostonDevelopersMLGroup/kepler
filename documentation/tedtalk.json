@@ -1,1 +1,73 @@
-https://www.kaggle.com/miguelcorraljr/ted-ultimate-dataset
+{
+    "comment": "https://www.kaggle.com/miguelcorraljr/ted-ultimate-dataset",
+    "files" : [
+        {
+            "filename" : "ted_talks_en.csv",
+            "na-filter": true,
+            "workingColumns": [
+                {
+                    "header" : "talk_id",
+                    "is-json" : false
+                },
+                {
+                    "header" : "title",
+                    "is-json" : false
+                },
+                {
+                    "header" : "occupations",
+                    "is-regex" : true,
+                    "expression" : "'([^']*)'",
+                    "item-count": 5
+                },
+                {
+                    "header" : "topics",
+                    "is-regex" : true,
+                    "expression" : "'([^']*)'",
+                    "item-count": 5
+                },
+                {
+                    "header" : "description",
+                    "is-json" : false
+                }                
+            ],
+            "drop": [],
+            "rename" : [],
+            "combineColumns" : [
+                {
+                    "combine-header": "combine",
+                    "column1" : "occupations",
+                    "column2" : "topics",
+                    "item-count": 10,
+                    "drop-source-columns": true
+                }
+            ]
+        }
+    ],
+    "transform" : { },
+    "analyze" : {
+        "vectorizers" : [
+            { "id": "countVec", "vectorizer": "count", "stop-words":"english", "column": "combine"},
+            { "id": "tfidfVec", "vectorizer": "tfidf", "stop-words":"english", "column": "description"}
+        ],
+        "sparse-stack": [
+            {
+                "id" : "sparse",
+                "stack-type" : "hstack",
+                "format" : "csr",
+                "vectorized-matrix-ids" : ["countVec","tfidfVec"]
+            }            
+        ],
+        "metrics": {
+            "similarity" : "cosine"
+        }
+    },
+    "recommend" : {
+        "request-column" : "title",
+        "response-count" : 20,
+        "response-columns" : [
+            {"source": "talk_id", "output":"Talk_ID" },
+            {"source":"title", "output":"Name"},
+            {"source":"topics","output":"Topics"}
+        ]
+    }
+}

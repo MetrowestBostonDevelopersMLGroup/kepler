@@ -10,6 +10,9 @@ class Transform:
 
     def MergeDataFiles(self, configMgr):        
         
+        if configMgr.transform.fromFilename is None and configMgr.transform.toFilename is None:
+            return configMgr.filesObj[0]
+
         # merge the dataframe
         fromDataObj = configMgr.GetDataFileFromFilename(configMgr.transform.fromFilename)
         toDataObj = configMgr.GetDataFileFromFilename(configMgr.transform.toFilename)
