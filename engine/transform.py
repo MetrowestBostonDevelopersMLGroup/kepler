@@ -1,6 +1,39 @@
 from appManagement import dataFile as df
 
 class Transform:
+    """
+    Provides the engine with data transformation capability, specifically:
+    - dropping columns
+    - renaming columns
+    - ordering columns
+    - identifying the columns to 'work' with
+    - parsing the row level data for 'complex' columms into a simpler format, such as:
+        - JSON - columns that contain JSON formatted data
+        - REGEX - apply regular expressions to extract information
+        - DELIM - identify delimited data
+
+    Parameters
+    ----------
+    configMgr : object
+        An instance of a class which is reponsible for identifying the configuration 
+        to use for recommendations
+    dataFile: object
+        An instance of the class resulting from the parsed data file JSON configuration
+
+    Attributes
+    ----------
+
+    Methods
+    -------
+    TransformDataFile
+    MergeDataFiles
+
+    Raises
+    ------
+
+    Notes and Examples
+    ------------------
+    """
 
     def TransformDataFile(self, dataFile):
         dataFile.OrderWorkingFiles()

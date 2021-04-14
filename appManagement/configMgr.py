@@ -8,14 +8,13 @@ from appManagement import recommendInstructions as ri
 from appManagement import audit as au
 
 class ConfigMgr:
-    
-    parsed_json = None
-    filesObj = []
-    transform = None
-    analyze = None
-    recommend = None
-    uploadFolder = None
-    audit = None
+    parsed_json = None      # result of the json.loads operation
+    filesObj = []           # collection of DataFile objects parsed from the configuration
+    transform = None        # TransformationInstruction instance
+    analyze = None          # AnalyzeInstruction instance
+    recommend = None        # RecommendInstruction instance
+    uploadFolder = None     # upload folder path
+    audit = None            # Audit instance
 
     def __init__(self, uploadFolder):
         self.uploadFolder = uploadFolder
@@ -26,6 +25,9 @@ class ConfigMgr:
         self.analyze = None
         self.recommend = None
 
+    # ----
+    # Load the configuration file specified by configJson parameter and parse
+    # ----
     def LoadAndParse(self, configJson):       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
@@ -43,6 +45,9 @@ class ConfigMgr:
         self.ParseRecommend()
         return content, True
 
+    # ----
+    # Given the configuration JSON specified by the content parameter, parse the configuration
+    # ----
     def Parse(self, content):       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
@@ -59,15 +64,22 @@ class ConfigMgr:
         self.ParseRecommend()
         return content, True
 
+    # ----
+    # Retrieve the associated audit messages.
+    # ----
     def GetAudit(self):
         return self.audit.messages
-
+    # ----
+    # Determines if there is an error in the audit message collection.
+    # ----
     def IsAuditError(self):
         audit = [x for x in self.GetAudit() if x.level == 'Error']
         if len(audit) > 0:
             return True
         return False
-
+    # ----
+    # Private method, top of the chain to parse the configuration.
+    # ----
     def LoadAndParseDataFiles(self):
         files = []
         if not 'files' in self.parsed_json:
@@ -86,6 +98,9 @@ class ConfigMgr:
         
         return files
     
+    # ----
+    # Private parse method
+    # ----
     def ParseTransform(self):
         if not 'transform' in self.parsed_json:
             self.audit.AddMessage(au.Audit.ERROR_CONFIG_DOES_NOT_CONTAIN_TRANSFORM_SECTION,'')
@@ -106,7 +121,10 @@ class ConfigMgr:
                     self.audit.AddMessage(au.Audit.ERROR_TRANSFORM_SECTION_MERGE_MISSING_ON_COLUMN,'')
                 else:
                     self.transform.onColumn = self.parsed_json['transform']['merge']['on-column']                    
-
+    
+    # ----
+    # Private parse method
+    # ----
     def ParseAnalyze(self):
         if not 'analyze' in self.parsed_json:
             self.audit.AddMessage(au.Audit.ERROR_CONFIG_DOES_NOT_CONTAIN_ANALYZE_SECTION,'')
@@ -177,6 +195,9 @@ class ConfigMgr:
                 else:
                     stack.similarity = self.parsed_json['analyze']['metrics']['similarity']                 
 
+    # ----
+    # Private parse method
+    # ----
     def ParseRecommend(self):
         if not 'recommend' in self.parsed_json:
             self.audit.AddMessage(au.Audit.ERROR_CONFIG_DOES_NOT_CONTAIN_RECOMMEND_SECTION,'')
@@ -210,9 +231,16 @@ class ConfigMgr:
 
                     self.recommend.responseColumns.append(column)
 
+    # ----
+    # Returns the DataFile object collection.
+    # ----
     def DataFiles(self):
         return self.filesObj
 
+    # ----
+    # TODO: pre-flight, validate the configuration
+    # may not be necessary, just regular load and parse
+    # ----
     def ValidateConfig(self):
         for file in self.filesObj:
             file.GetFilename()
@@ -220,11 +248,17 @@ class ConfigMgr:
             file.IsFileAvailable()
 
         return json.dumps(self.audit.messages, indent = 4, default=lambda o: o.__dict__)
-       
+
+    # ----
+    # Given a datafile name, returns the associated DataFile object.
+    # ----     
     def GetDataFileFromFilename(self, filename):
         files = [item for item in self.filesObj if item.GetFilename() == filename]
         return files[0]
 
+    # ----
+    # Returns the name of the column on which the recommendation request is made.
+    # ----
     def GetRequestColumnName(self):
         if self.recommend is not None:
             return self.recommend.requestColumn 

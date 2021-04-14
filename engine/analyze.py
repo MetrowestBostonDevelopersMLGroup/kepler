@@ -6,7 +6,38 @@ from appManagement import analyzeInstructions as ai
 from appManagement import configMgr 
 
 class Analyze:
+    """
+    Provides the engine with data analysis capability, specifically:
+    - vectorization of column data
+    - combining vectorization output
+    - processing similarity
 
+    Parameters
+    ----------
+    configMgr : object
+        An instance of a class which is reponsible for identifying the configuration 
+        to use for recommendations
+    workingDataFile: object
+        An instance of the data file from which ETL has already been performed
+
+    Attributes
+    ----------
+
+    Methods
+    -------
+    TransformDataFile
+    MergeDataFiles
+
+    Raises
+    ------
+
+    Notes and Examples
+    ------------------
+    """
+
+    # ---
+    # Performs the analysis of the supplied data.
+    # ---
     def VectorizeAndSimilarity(self, configMgr, workingDatafile):
         
         matrixlist = []
@@ -35,6 +66,9 @@ class Analyze:
 
         return self.similarity
 
+    # ---
+    # Given a request, returns the associate recommendation or empty set.
+    # ---
     def Recommend(self, configMgr, workingData, columnName, request):
 
         indices = pd.Series(workingData.index, index = workingData[columnName])

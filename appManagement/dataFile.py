@@ -8,12 +8,12 @@ from appManagement import workingColumn as wc
 from appManagement import combineColumn as cc
 
 class DataFile:
-    jsonObj = None
-    uploadFolder = None
-    audit = []
-    data = None
-    workingColumns = []
-    combineColumns = []
+    jsonObj = None          # result of the json.loads operation
+    uploadFolder = None     # the upload file path
+    audit = []              # the audit instance
+    data = None             # Dataframe from pandas.read_csv
+    workingColumns = []     # collection of WorkingColumn objects
+    combineColumns = []     # collection of CombineColumn objects
 
     def __init__(self, dataObject, uploadFolder, audit):
         self.jsonObj = dataObject
@@ -22,7 +22,9 @@ class DataFile:
         self.workingColumns = []
         self.combineColumns = []
         self.data = None        
-
+    # ----
+    # Parses a specific file configuration
+    # ----
     def ParseAndAudit(self):
         hasFilename = True
         if not 'filename' in self.jsonObj:
@@ -137,6 +139,9 @@ class DataFile:
 
         return 'ok'
 
+    # ----
+    # String to bool
+    # ----
     def to_bool(self, value):
         valid = {'true': True, 't': True, '1': True,
                 'false': False, 'f': False, '0': False,
@@ -154,10 +159,15 @@ class DataFile:
         else:
             raise ValueError('invalid literal for boolean: "%s"' % value)
 
-
+    # ----
+    # TODO
+    # ----
     def Validate(self):
         return 'ok'    
 
+    # ----
+    # Determines if the 'physical' file associated with the datafile instance has been uploaded and is available to load.
+    # ----
     def IsFileAvailable(self):
         avail = os.path.isfile(self.uploadFolder+'/'+self.GetFilename())
         if not avail:
@@ -166,24 +176,40 @@ class DataFile:
             pass
         return avail
 
+    # ----
+    # Loads the associated data file.
+    # ----
     def LoadData(self):
         self.data = pd.read_csv(self.uploadFolder+'/'+self.GetFilename(), na_filter=self.GetNAFilter())
-
+    
+    # ----
+    # Returns the filename from the JSON object
+    # ----
     def GetFilename(self):
         return self.jsonObj['filename']
-
+    
+    # ----
+    # Returns the NA filter from the JSON object
+    # ----
     def GetNAFilter(self):
         return self.jsonObj['na-filter']
 
-    def Table(self):
-        return None
-        
+    # ----
+    # Returns a collection of the column names for the working columns
+    # ----       
     def WorkingColumnHeaders(self): 
         titles = []
         for work in self.jsonObj['workingColumns']:
             titles.append(work['header'])
         return titles
 
+    # ----
+    # Processes the contents of 'complex' columns into something that is simpler.
+    # Implements the code to convert:
+    #   - JSON columns
+    #   - Delimited columns
+    #   - Regex extraction
+    # ----
     def WorkingColumnsConvertCompoundField(self): 
         for workCol in self.workingColumns:
             if workCol.isJson:
@@ -199,6 +225,9 @@ class DataFile:
                     self.data[workCol.header] = self.data[workCol.header].apply(lambda x: self.get_list_regex(x, workCol.itemCount,workCol.expression))
                     continue                
 
+    # ----
+    # Drops the columns specified in the configuration for this file.
+    # ----   
     def DropColumns(self):        
         try:
             if 'drop' in self.jsonObj:
@@ -206,6 +235,9 @@ class DataFile:
         except Exception as ex:
             self.audit.AddMessage(au.Audit.ERROR_TRANSFORM_DROP_COLUMN_EXCEPTION, ex)        
 
+    # ----
+    # Renames the columns specified in the configuration for this file.
+    # ----   
     def RenameColumns(self):
         try:
             if 'rename' in self.jsonObj:
@@ -214,6 +246,9 @@ class DataFile:
         except Exception as ex:
             self.audit.AddMessage(au.Audit.ERROR_TRANSFORM_RENAME_COLUMN_EXCEPTION, ex)                
 
+    # ----
+    # Combines the columns specified in the configuration for this file.
+    # ----   
     def CombineColumns(self):       
         for combine in self.combineColumns:
             col1 = None
@@ -240,8 +275,14 @@ class DataFile:
             
             self.data[combine.combineHeader] = self.data[[col1.header,col2.header]].apply(lambda x: ','.join(x.dropna().astype(str)),axis=1)
 
-        return [] # actually perform the combine operation
+        return [] 
 
+    # ----
+    # Lambda performing the JSON column conversion.
+    #   - jsonData      - the cell data to parse
+    #   - returnCount   - the number of matches to return
+    #   - attributeName - the attibute to match on
+    # ----   
     def get_list_json(self, jsonData, returnCount, attributeName):       
         try:
             if isinstance(jsonData, str):        
@@ -255,6 +296,12 @@ class DataFile:
             return []
         return []
 
+    # ----
+    # Lambda performing the delimited column conversion.
+    #   - cellata       - the cell data to parse
+    #   - returnCount   - the number of matches to return
+    #   - separator     - the character to separate by
+    # ----   
     def get_list_delim(self, cellData, returnCount, separator):
         try:
             as_list = cellData.split(separator)
@@ -264,6 +311,12 @@ class DataFile:
             return []
         return []
 
+    # ----
+    # Lambda performing the Regex column conversion.
+    #   - cellData      - the cell data to parse
+    #   - returnCount   - the number of matches to return
+    #   - expression    - the regex to apply
+    # ----   
     def get_list_regex(self, cellData, returnCount, expression):  # r"\(u'(.*?)',\)"
         try:
             as_list = re.findall(expression, cellData) 
@@ -273,6 +326,8 @@ class DataFile:
             return []
         return []
 
+    # ----
+    # Orders the columns in working-column order
+    # ----   
     def OrderWorkingFiles(self):
-        # do similar to: data_credits = data_credits[['movie_id','title','cast','crew']]
         self.data = self.data[self.WorkingColumnHeaders()]        

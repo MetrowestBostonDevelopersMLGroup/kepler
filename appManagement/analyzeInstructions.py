@@ -1,3 +1,17 @@
+"""
+This file contains classes which are initialized with the information from the
+configuration JSON file. These objects decouple the JSON format with the
+recommendation service code.
+
+Classes
+-------
+    SparseStack
+    VectorizeInstructions
+    AnalyzeInstructions
+
+Notes and Examples
+------------------
+"""
 
 class SparseStack:
     identifier = None
@@ -22,7 +36,6 @@ class VectorizeInstructions:
         self.vectorizerName = None
         self.stopWords = "english"
         self.column = None
-
 
 class AnalyzeInstructions:
     vectorizers = []

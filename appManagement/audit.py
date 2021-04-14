@@ -77,9 +77,17 @@ class Audit:
     def __init__(self):
         pass
 
+    # ----
+    # Clears the audi message collection.
+    # ----
     def ClearMessages(self):
         self.messages = []
 
+    # ----
+    # Add an audit message to the collection.
+    #   message - is one of the message constant instances defined at the top of this file
+    #   extra - any additional information that is necessary to provide context to the message
+    # ----
     def AddMessage(self, message, extra):
         if (message.level =='Error'):
             self.isErrorEncountered = True
@@ -88,9 +96,15 @@ class Audit:
         self.messages.append(message)
         print(str(message.code)+' '+message.message+' '+message.extra)
 
+    # ----
+    # Identifies if any error-level messages have been added to the audit collection.
+    # ----
     def IsErrorInAudit(self):
         return self.isErrorEncountered
 
+    # ----
+    # Returns the audit message collection as an easy to view HTML table.
+    # ----
     def MessagesAsHtmlTable(self):
         df = pd.DataFrame([t.__dict__ for t in self.messages ])
         return df.to_html()
