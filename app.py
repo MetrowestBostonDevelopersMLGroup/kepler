@@ -10,6 +10,7 @@ from routes import kepler_api
 from recommend import prepdata, movies
 from appManagement import session
 from appManagement import configMgr as cmgr
+from appManagement import appMethods as appm
 from engine import engine as eng
 from werkzeug.utils import secure_filename
 
@@ -26,10 +27,10 @@ app.config['SESSION_TYPE'] = 'memcached'
 #sess.init_app(app)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.sessions = []
+app.sessions = {}
 
 # create a single session for all interaction (when developing locally)
-app.session = {'session1': session.Session(None, None, None)}
+app.session = {'session1': session.Session(None)}
 
 app.current_editor_file_id = None
 app.current_filename = None
@@ -40,6 +41,7 @@ app.current_config = None
 app.current_requestColumn = None
 app.current_searchValue = None
 app.recEngine = None
+app.appMethods = appm.AppMethods(app.sessions, app.config['UPLOAD_FOLDER'])
 
 app.configMgr = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
 
@@ -225,6 +227,9 @@ def editconfig_file():
     data = {'config':content}
     return render_template('configeditor.html', editor=data)
 
+# This is the primitive configuration editor UI. You type in (or edit) an existing
+# configuration file. The [parse] button will validate the configuration and provide
+# feedback in terms of warnings and errors.
 @app.route("/config_editor", methods=['GET', 'POST'])
 def cfg_editor():
     if request.method == 'POST':    
@@ -283,6 +288,9 @@ def cfg_editor():
     data = {'filename':filename,'config':content, 'files':app.config_files}
     return render_template('configeditor.html', editor=data)
 
+# This is the recommender primitive UI. It allows you to select the configuration file that
+# you want to load (and parse). Upon successful parsing, and similarity analysis, you can then
+# enter the information on which the system matches and displays a table of similar items.
 @app.route("/recommender", methods=['GET', 'POST'])
 def recommender():
     if request.method == 'POST':    

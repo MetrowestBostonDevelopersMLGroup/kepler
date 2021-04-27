@@ -14,6 +14,8 @@ class DataFile:
     data = None             # Dataframe from pandas.read_csv
     workingColumns = []     # collection of WorkingColumn objects
     combineColumns = []     # collection of CombineColumn objects
+    na_filter = True
+    error_bad_lines = False
 
     def __init__(self, dataObject, uploadFolder, audit):
         self.jsonObj = dataObject
@@ -22,6 +24,9 @@ class DataFile:
         self.workingColumns = []
         self.combineColumns = []
         self.data = None        
+        self.na_filter = True
+        self.error_bad_lines = False
+
     # ----
     # Parses a specific file configuration
     # ----
@@ -32,6 +37,14 @@ class DataFile:
             hasFilename = False
         if not 'na-filter' in self.jsonObj:
             self.audit.AddMessage(au.Audit.WARNING_FILE_SECTION_DOES_NOT_CONTAIN_NA_FILTER,'')
+        else:
+            self.na_filter = self.to_bool(self.jsonObj['na-filter'])
+
+        if not 'error-bad-lines' in self.jsonObj:
+            self.audit.AddMessage(au.Audit.WARNING_FILE_SECTION_DOES_NOT_CONTAIN_ERROR_BAD_LINES,'') 
+        else:
+            self.error_bad_lines = self.to_bool(self.jsonObj['error-bad-lines'])
+
         if hasFilename:
             self.IsFileAvailable()
         
@@ -180,7 +193,7 @@ class DataFile:
     # Loads the associated data file.
     # ----
     def LoadData(self):
-        self.data = pd.read_csv(self.uploadFolder+'/'+self.GetFilename(), na_filter=self.GetNAFilter())
+        self.data = pd.read_csv(self.uploadFolder+'/'+self.GetFilename(), na_filter=self.GetNAFilter(), error_bad_lines = self.GetErrorBadLines())
     
     # ----
     # Returns the filename from the JSON object
@@ -189,10 +202,16 @@ class DataFile:
         return self.jsonObj['filename']
     
     # ----
-    # Returns the NA filter from the JSON object
+    # Returns the NA filter for the file. see pandas.read_csv
     # ----
     def GetNAFilter(self):
-        return self.jsonObj['na-filter']
+        return self.na_filter 
+
+    # ----
+    # Returns the error_bad_lines for the file. see pandas.read_csv
+    # ----
+    def GetErrorBadLines(self):
+        return self.error_bad_lines 
 
     # ----
     # Returns a collection of the column names for the working columns

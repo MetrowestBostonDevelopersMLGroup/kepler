@@ -2,16 +2,26 @@ import uuid
 
 class Session:
 
-  def __init__(self, dataPrep, dataTransform, dataReady):
-    self.dataPrep = dataPrep
-    self.dataTransform = dataTransform
-    self.dataReady = dataReady
+  configMgr = None
+  sessionId = None
+  filename = None
+  recEngine = None
 
-  def setDataTransform(self, dataTransform):
-    self.dataTransform = dataTransform
-
-  def setDataReady(self, dataReady):
-    self.dataReady = dataReady
+  def __init__(self, configManager):
+    self.configMgr = configManager
 
   def getNewSID(self):
-    return uuid.uuid4()
+    self.sessionId = uuid.uuid4().hex
+    return self.sessionId
+
+  def setFilename(self, filename):
+    self.filename = filename
+
+  def getConfigMgr(self):
+    return self.configMgr
+
+  def setRecEngine(self, recEngine):
+    self.recEngine = recEngine
+
+  def getRecEngine(self):
+    return self.recEngine

@@ -10,13 +10,14 @@ class Audit:
     INFO_START_AUDIT = msg.Message(0, 'Start audit.', 'Info')
     
     # warning messages 2001 - 4001
-    WARNING_FILE_SECTION_DOES_NOT_CONTAIN_NA_FILTER = msg.Message(2001, 'One of the file sections does not define an na-filter property, a value of TRUE will be defaulted.','Warning')
+    WARNING_FILE_SECTION_DOES_NOT_CONTAIN_NA_FILTER = msg.Message(2001, 'One of the file sections does not define an na-filter property, a value of TRUE will be defaulted. See pandas.read_csv docs.','Warning')
     WARNING_FILE_SECTION_DOES_NOT_CONTAIN_COLUMNS_TO_DROP = msg.Message(2002, 'One of the file sections does not define columns to drop.','Warning')
     WARNING_FILE_SECTION_DOES_NOT_CONTAIN_COLUMNS_TO_RENAME = msg.Message(2003, 'One of the file sections does not define columns to rename.','Warning')
     WARNING_VECTORIZER_SECTION_MISSING_STOPWORDS = msg.Message(2004, 'Analyze section vectorize collection missing stop-words attribute. English will be the default stop words value.','Warning')
     WARNING_COMBINE_COLUMN_MISSING_ITEM_COUNT_ATTRIBUTE = msg.Message(2005, 'Files section combine column collection missing item-count attribute. The entire column contents will be combined by default.','Warning')
     WARNING_COMBINE_COLUMN_MISSING_DROP_SOURCE_COLUMNS_ATTRIBUTE = msg.Message(2006, 'Files section combine column collection missing drop-source-columns attribute. The source columns will be dropped by default.','Warning')
     WARNING_WORKING_COLUMN_MISSING_ITEM_COUNT_ATTRIBUTE = msg.Message(2007, 'Working column section JSON column missing item-count attribute. The entire column contents will be extracted by default.','Warning')
+    WARNING_FILE_SECTION_DOES_NOT_CONTAIN_ERROR_BAD_LINES = msg.Message(2008, 'One of the file sections does not define an error-bad-lines property, a value of FALSE will be defaulted. See pandas.read_csv docs.','Warning')
 
     #error messages 5000+
     ERROR_DATAFILE_NOT_UPLOADED = msg.Message(5000, 'This datafile has not been uploaded.','Error')

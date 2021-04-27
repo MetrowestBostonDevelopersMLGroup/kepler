@@ -3,7 +3,7 @@
   "info": {
     "description": "Metrowest Boston Developers Machine Learning Group",
     "version": "1.0.0",
-    "title": "Recommender System",
+    "title": "Kepler Recommender System",
     "license": {
       "name": "MIT",
       "url": "https://opensource.org/licenses/MIT"
@@ -14,13 +14,24 @@
       "url": "/"
     }
   ],
-  "tags": [
-    {
-      "name": "Recommendation Request",
-      "description": "Example API for defining and requesting recommendations"
-    }
-  ],
   "paths": {
+
+    "/v1/configuration": {
+      "get": {
+        "tags": [
+          "Configuration Management"
+        ],
+        "summary": "Returns a list of all uploaded configurations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        }
+      }
+    },
 
     "/v1/session": {
       "get": {
@@ -59,26 +70,25 @@
       }
     },
 
-
-    "/v1/configuration": {
+    "/v1/loadAndParseConfig": {
       "post": {
         "tags": [
           "Recommendation"
         ],
-        "parameters" : [
-          {
-                "name": "filename",
-                "description": "json file upload ",
-                "required": true,
-                "type": "file",
-                "in": "formData"
-            }],        
-        "summary": "Create a new session",
+        "requestBody": {
+          "description": "Load, Parse and Analyze",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/loadConfigRequestPostBody"
+              }
+            }
+          }
+        },     
+        "summary": "Loads, parses and analyzes configuration and associated data",
         "produces": [
           "application/json"
-        ],
-        "consumes": [
-          "multipart/form-data"
         ],
         "responses": {
           "201": {
@@ -94,37 +104,24 @@
       }
     },    
 
-    "/v1/request": {
-      "get": {
-        "tags": [
-          "Recommendation Request"
-        ],
-        "summary": "Returns a list of all book recommendations",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/components/schemas/bookRequests"
-            }
-          }
-        }
-      },
+
+    "/v1/configRecommend": {
       "post": {
         "tags": [
-          "Recommendation Request"
+          "Recommendation"
         ],
-        "summary": "Create a new book request system",
         "requestBody": {
-          "description": "Book Request Post Object",
+          "description": "Make a recommendation",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/bookRequestPostBody"
+                "$ref": "#/components/schemas/recommendRequestPostBody"
               }
             }
           }
-        },
+        },     
+        "summary": "Utilizing the onfiguration file and loaded data, make a recommendation",
         "produces": [
           "application/json"
         ],
@@ -140,172 +137,35 @@
           }
         }
       }
-    },
-    "/v1/request/{id}": {
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "description": "ID of the cat that we want to match",
-          "type": "string"
-        }
-      ],
-      "get": {
-        "tags": [
-          "Recommendation Request"
-        ],
-        "summary": "Get book request with given ID",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "Book Request id",
-            "schema": {
-              "$ref": "#/components/schemas/id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/components/schemas/bookRequest"
-            }
-          },
-          "400": {
-            "description": "Failed. Misunderstood Request."
-          },
-          "404": {
-            "description": "Failed. Book request not found."
-          }
-        }
-      },
-      "put": {
-        "summary": "edit a book request by ID",
-        "tags": [
-          "Recommendation Request"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "Session Request id",
-            "schema": {
-              "$ref": "#/components/schemas/id"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "Book Request Object",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/bookRequest"
-              }
-            }
-          }
-        },
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/components/schemas/bookRequest"
-            }
-          },
-          "400": {
-            "description": "Failed. Bad post data."
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Book Request by ID",
-        "tags": [
-          "Recommendation Request"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "Book Request Id",
-            "schema": {
-              "$ref": "#/components/schemas/id"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/components/schemas/id"
-            }
-          },
-          "400": {
-            "description": "Failed. Misunderstood Request."
-          },
-          "404": {
-            "description": "Failed. Book Request not found."
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
-      "id": {
-        "properties": {
-          "uuid": {
-            "type": "string"
-          }
-        }
-      },
-      "bookRequestPostBody": {
+      "loadConfigRequestPostBody": {
         "type": "object",
         "properties": {
-          "title": {
+          "sessionId": {
             "type": "string",
             "format": "string"
           },
-          "email": {
+          "filename": {
             "type": "string",
-            "format": "email"
+            "format": "string"
           }
         }
-      },
-      "bookRequest": {
+      },      
+      "recommendRequestPostBody": {
         "type": "object",
         "properties": {
-          "title": {
+          "sessionId": {
             "type": "string",
             "format": "string"
           },
-          "email": {
+          "prompt": {
             "type": "string",
-            "format": "email"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "number"
+            "format": "string"
           }
-        }
-      },
-      "bookRequests": {
-        "type": "object",
-        "properties": {
-          "bookRequest": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/bookRequest"
-            }
-          }
-        }
+        }      
       }
     }
   }
