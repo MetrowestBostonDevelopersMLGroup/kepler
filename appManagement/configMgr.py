@@ -8,6 +8,27 @@ from appManagement import recommendInstructions as ri
 from appManagement import audit as au
 
 class ConfigMgr:
+    """
+    The heart and soul of the configuration file parsing system. An instance of this object contains the object-model which
+    decouples the JSON file from methods and properties which reflect the configuration.
+
+    Parameters
+    ----------
+
+    Attributes
+    ----------
+
+    Methods
+    -------
+
+    Raises
+    ------
+    ValueError
+
+    Notes and Examples
+    ------------------
+    """
+
     parsed_json = None      # result of the json.loads operation
     filesObj = []           # collection of DataFile objects parsed from the configuration
     transform = None        # TransformationInstruction instance

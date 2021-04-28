@@ -32,6 +32,7 @@ app.sessions = {}
 # create a single session for all interaction (when developing locally)
 app.session = {'session1': session.Session(None)}
 
+# these variables are used by the Flask templated Configuration Editor and Recommender UI
 app.current_editor_file_id = None
 app.current_filename = None
 app.current_filename_basename = None
@@ -41,6 +42,8 @@ app.current_config = None
 app.current_requestColumn = None
 app.current_searchValue = None
 app.recEngine = None
+
+# used in session by REST calls
 app.appMethods = appm.AppMethods(app.sessions, app.config['UPLOAD_FOLDER'])
 
 app.configMgr = cmgr.ConfigMgr(os.getcwd()+app.config['UPLOAD_FOLDER'])
@@ -92,10 +95,6 @@ def handle_500_error(_error):
 def hello():
     print("hello world")
     return app.send_static_file("index.html")
-
-@app.route('/hello')
-def hello_world():
-   return "hello world"
 
 # index route
 # params
@@ -295,7 +294,7 @@ def cfg_editor():
 def recommender():
     if request.method == 'POST':    
         if request.form['files'] != app.current_editor_file_id:
-            # open up the file that is selected
+            # open up the file that is selected, parse the file and analyze the data 
             app.current_filename = app.config_files[int (request.form['files'])-1]['name']
             app.current_filename_basename = os.path.basename(app.current_filename)
             filename = os.getcwd()+app.config['UPLOAD_FOLDER']+'/'+ app.current_filename

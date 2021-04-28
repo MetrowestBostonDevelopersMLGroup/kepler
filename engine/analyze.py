@@ -62,6 +62,7 @@ class Analyze:
             sparse = sp.hstack(matrixlist, format=configMgr.analyze.sparseStack[0].stackFormat)
 
         #similarity
+        #TODO: this similarity function should be identified by the configuration... it's hardwired and shouldn't be
         self.similarity = cosine_similarity(sparse, sparse)
 
         return self.similarity

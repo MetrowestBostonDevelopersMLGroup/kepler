@@ -2,9 +2,34 @@ from appManagement import message as msg
 import pandas as pd
 
 class Audit:
+    """
+    This class contains 'staticly' defined instances which represent the parsing and other processing failures or warnings that occur
+    during configuration file loading.
 
-    messages = []
-    isErrorEncountered = False
+    Parameters
+    ----------
+
+    Attributes
+    ----------
+
+    Methods
+    -------
+    ClearMessages
+    AddMessage
+    IsErrorInAudit
+    MessagesAsHtmlTable
+
+    Raises
+    ------
+    ValueError
+
+    Notes and Examples
+    ------------------
+    """
+
+
+    messages = []                # contains the collection of audit messages
+    isErrorEncountered = False   # set to True when the first error message is added to the audit collection.
 
     # info messages 0 - 2000
     INFO_START_AUDIT = msg.Message(0, 'Start audit.', 'Info')
