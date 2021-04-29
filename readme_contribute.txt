@@ -10,7 +10,9 @@ Please regress before creating a pull request.  This assumes we have tests.
 Workflow - How to create a "pull request"
 https://www.thinkful.com/learn/github-pull-request-tutorial/Time-to-Submit-Your-First-PR
 
-The following assumes you did a 'git clone' to populate a local workarea. You worked for a while and decide you want to commit your changes to the original repository.  As such you are starting with 2 repositories which I will call "local" and "upstream".   To publish your changes as a pull request you will need to create yet a third repository ("origin")
+The following assumes you did a 'git clone' to populate a local workarea. You worked for a while and decide you want to commit your changes to the original repository.  As such you are starting with 2 repositories which I will call "local" and a remote "upstream".
+
+To create a pull request you need to persist your changes somewhere.  So you will need to create yet a third repository (a second remote called "mygithub" on your github account.
 
 Steps:
 
@@ -27,16 +29,31 @@ git commit
 5) In your local workarea -  create remotes for "upstream" and "mygithub"  - ditch "origin"
 git remote -v  (just to see it was referring to the original author's github repository)
 git remote add upstream  <whatever the origin was>
-git remote add mygithub https://github.com/cwinsor/REPOSITORY_NAME
+git remote add mygithub https://github.com/YOURNAME/REPOSITORY_NAME
 git remote remove origin
 git remote -v  (to see it is now remotes pointing to the two repositories)
 
 6) In your local workarea - create a branch on the local repository
-git checkout -b BRANCH_NAME
-git branch    (just to show that you are on the branch)
-Your changes should be on the branch.
+git checkout -b MY_BRANCH_NAME   (I typically use something like cwinsor_001_blahblah)
+git branch    (just to confirm you are now on the branch)
+git merge main (this merges changes from main onto your branch)
 
-7) 
+7) If you make more changes on the branch, git commit them when you finish.
+
+8) Push to "mygithub" the MY_BRANCH_NAME branch.  This pushes changes to your github on branch.
+Remind yourself:
+git branch    (what branch am I on)
+git remove -v (what are my remote repositories)
+then:
+git push mygithub MY_BRANCH_NAME 
+You will see
+    To https://github.com/cwinsor/kepler.git
+    * [new branch]      cwinsor_001_add_setup.py -> cwinsor_001_add_setup.py
+
+9) Use your browser and revisit your github repository
+Hit the "branches" button
+Your branch will show up 2 times.  Click on the one associated with the remote repository and push "create pull request".
+
 
 
 
