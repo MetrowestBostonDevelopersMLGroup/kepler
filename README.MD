@@ -1,6 +1,6 @@
-# Python Products
+# Kepler Recommendation Engine
 
-A Python/Flask dashboard for a Products database.
+A Python/Flask recommendation that utilizes configuration over code.
 
 ## Prequisites
 
