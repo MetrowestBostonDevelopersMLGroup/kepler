@@ -2,7 +2,9 @@ import os
 import json, pathlib
 from flask import jsonify
 from engine import engine as eng
+from dataclasses import dataclass
 
+@dataclass
 class AppMethods:
     """
     Provides access to REST endpoints of the functionality which is present in the application object 'app'.
@@ -34,14 +36,14 @@ class AppMethods:
     sessions = None
     uploadFolder = None
 
-    def __init__(self, sessions, uploadFolder):
+    def __init__(self, sessions:dict, uploadFolder: str):
         self.sessions = sessions
         self.uploadFolder = uploadFolder
 
     # ----
     # Load the configuration file specified by filename parameter, into the session, and parse and analyze the data files.
     # ----
-    def loadAndParseInSession(self, sessionId, filename):
+    def loadAndParseInSession(self, sessionId: str, filename: str) -> str:
         session = self.sessions[sessionId]
         session.setFilename(filename)
         filename = os.getcwd()+self.uploadFolder+'/'+ filename
@@ -57,7 +59,7 @@ class AppMethods:
     # ----
     # Produces recommendations for the specified session and prompt
     # ----
-    def configRecommend(self, sessionId, prompt):
+    def configRecommend(self, sessionId: str, prompt: str) -> str:
         session = self.sessions[sessionId]        
         result, isRecommendSuccess = session.getRecEngine().Recommendation(prompt)
         return result.to_json(orient="split")
@@ -65,7 +67,7 @@ class AppMethods:
     # ----
     # Returns a list of .cfg files that are uploaded to the recommendation system
     # ----
-    def listUploadedConfigurations(self):
+    def listUploadedConfigurations(self) -> list:
         updir = os.getcwd()+self.uploadFolder
         os.makedirs(updir, exist_ok=True)  
         files = os.listdir(updir)

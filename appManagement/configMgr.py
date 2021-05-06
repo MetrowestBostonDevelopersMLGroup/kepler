@@ -1,12 +1,15 @@
 import pandas as pd
 import json
 from flask import jsonify
+from typing import List
 from appManagement import dataFile as df
 from appManagement import transformInstructions as ti
 from appManagement import analyzeInstructions as vi
 from appManagement import recommendInstructions as ri
 from appManagement import audit as au
+from dataclasses import dataclass
 
+@dataclass
 class ConfigMgr:
     """
     The heart and soul of the configuration file parsing system. An instance of this object contains the object-model which
@@ -29,13 +32,13 @@ class ConfigMgr:
     ------------------
     """
 
-    parsed_json = None      # result of the json.loads operation
-    filesObj = []           # collection of DataFile objects parsed from the configuration
-    transform = None        # TransformationInstruction instance
-    analyze = None          # AnalyzeInstruction instance
-    recommend = None        # RecommendInstruction instance
-    uploadFolder = None     # upload folder path
-    audit = None            # Audit instance
+    parsed_json = None                  # result of the json.loads operation
+    filesObj = List[df.DataFile]        # collection of DataFile objects parsed from the configuration
+    transform: ti.TransformInstructions # TransformationInstruction instance
+    analyze: vi.AnalyzeInstructions     # AnalyzeInstruction instance
+    recommend: ri.Recommend             # RecommendInstruction instance
+    uploadFolder: str                   # upload folder path
+    audit: au.Audit                     # Audit instance
 
     def __init__(self, uploadFolder):
         self.uploadFolder = uploadFolder
@@ -49,7 +52,7 @@ class ConfigMgr:
     # ----
     # Load the configuration file specified by configJson parameter and parse
     # ----
-    def LoadAndParse(self, configJson):       
+    def LoadAndParse(self, configJson: str) -> (str, bool):       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         with open(configJson) as f:
@@ -69,7 +72,7 @@ class ConfigMgr:
     # ----
     # Given the configuration JSON specified by the content parameter, parse the configuration
     # ----
-    def Parse(self, content):       
+    def Parse(self, content: str) -> (str, bool):       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         
@@ -88,12 +91,12 @@ class ConfigMgr:
     # ----
     # Retrieve the associated audit messages.
     # ----
-    def GetAudit(self):
+    def GetAudit(self) -> list:
         return self.audit.messages
     # ----
     # Determines if there is an error in the audit message collection.
     # ----
-    def IsAuditError(self):
+    def IsAuditError(self) -> bool:
         audit = [x for x in self.GetAudit() if x.level == 'Error']
         if len(audit) > 0:
             return True
@@ -101,7 +104,7 @@ class ConfigMgr:
     # ----
     # Private method, top of the chain to parse the configuration.
     # ----
-    def LoadAndParseDataFiles(self):
+    def LoadAndParseDataFiles(self) -> list:
         files = []
         if not 'files' in self.parsed_json:
             self.audit.AddMessage(au.Audit.ERROR_CONFIG_DOES_NOT_CONTAIN_FILE_SECTION,'')
@@ -273,7 +276,7 @@ class ConfigMgr:
     # ----
     # Given a datafile name, returns the associated DataFile object.
     # ----     
-    def GetDataFileFromFilename(self, filename):
+    def GetDataFileFromFilename(self, filename: str):
         files = [item for item in self.filesObj if item.GetFilename() == filename]
         return files[0]
 

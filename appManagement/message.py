@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 
 class Message:
     """
@@ -11,12 +12,12 @@ class Message:
     ------------------
     """
 
-    code = None
-    message = None
-    level = None   # Info, Warning, Error
-    extra = None
+    code: int = None
+    message: str = None
+    level: str = None   # Info, Warning, Error
+    extra: str = None
 
-    def __init__(self, code, message, level):
+    def __init__(self, code: int, message: str, level: str):
         self.code = code
         self.message = message
         self.level = level

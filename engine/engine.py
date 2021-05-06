@@ -70,7 +70,7 @@ class Engine:
     # ---
     # Accepts a request and provides a recommendation, or empty set.
     # ---
-    def Recommendation(self, request):
+    def Recommendation(self, request: str):
 
         recommendation = self.analyze.Recommend(self.configurationMgr, self.finalDataObj.data, self.configurationMgr.recommend.requestColumn, request) #'Amavas') #'Aliens')
 

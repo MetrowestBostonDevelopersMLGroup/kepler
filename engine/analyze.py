@@ -38,18 +38,20 @@ class Analyze:
     # ---
     # Performs the analysis of the supplied data.
     # ---
-    def VectorizeAndSimilarity(self, configMgr, workingDatafile):
+    def VectorizeAndSimilarity(self, configMgr: configMgr.ConfigMgr, workingDatafile: str):
         
         matrixlist = []
         for vec in configMgr.analyze.vectorizers:
 
             if vec.vectorizerName == 'count':
+                # Count Vectorizer assigns a number to the frequency of the word within the corpus
                 vec.vectorizer = CountVectorizer(stop_words=vec.stopWords)
                 vec.matrix = vec.vectorizer.fit_transform(workingDatafile.data[vec.column])
                 matrixlist.append(vec.matrix)
                 pass
 
             if vec.vectorizerName == 'tfidf':
+                # Term Frequency Inverse Document Frequency gives a 'weight' value indicating the 'orginality' of the word
                 vec.vectorizer = TfidfVectorizer(stop_words=vec.stopWords)
                 vec.matrix = vec.vectorizer.fit_transform(workingDatafile.data[vec.column])
                 matrixlist.append(vec.matrix)
@@ -57,12 +59,14 @@ class Analyze:
 
             # otherwise- issue an error, unknown vectorizer
 
-        #stack sparse matrix
+        # Stack sparse matrices horizontally
         if configMgr.analyze.sparseStack[0].stackType == "hstack":
             sparse = sp.hstack(matrixlist, format=configMgr.analyze.sparseStack[0].stackFormat)
 
         #similarity
         #TODO: this similarity function should be identified by the configuration... it's hardwired and shouldn't be
+        # Cosine similarity is a metric used to determine how similar the documents are irrespective of their size.
+        # It measures the cosine of the angle between two vectors projected in a multi-dimensional space.
         self.similarity = cosine_similarity(sparse, sparse)
 
         return self.similarity
@@ -70,7 +74,7 @@ class Analyze:
     # ---
     # Given a request, returns the associate recommendation or empty set.
     # ---
-    def Recommend(self, configMgr, workingData, columnName, request):
+    def Recommend(self, configMgr: configMgr.ConfigMgr, workingData, columnName: str, request: str):
 
         indices = pd.Series(workingData.index, index = workingData[columnName])
         try:
