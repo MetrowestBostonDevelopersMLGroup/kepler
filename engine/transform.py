@@ -1,4 +1,5 @@
 from appManagement import dataFile as df
+from appManagement import configMgr as cf
 
 class Transform:
     """
@@ -35,13 +36,13 @@ class Transform:
     ------------------
     """
 
-    def TransformDataFile(self, dataFile):
+    def TransformDataFile(self, dataFile: df.DataFile):
         dataFile.OrderWorkingFiles()
         dataFile.DropColumns()
         dataFile.WorkingColumnsConvertCompoundField()
         dataFile.RenameColumns()
 
-    def MergeDataFiles(self, configMgr):        
+    def MergeDataFiles(self, configMgr: cf.ConfigMgr):        
         
         if configMgr.transform.fromFilename is None and configMgr.transform.toFilename is None:
             return configMgr.filesObj[0]

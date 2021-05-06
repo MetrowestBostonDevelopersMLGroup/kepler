@@ -1,5 +1,9 @@
 import uuid
+from appManagement import configMgr as cm
+from engine import engine as eng
+from dataclasses import dataclass
 
+@dataclass
 class Session:
   """
   Provides a place to store session information for the REST endpoints.
@@ -16,7 +20,7 @@ class Session:
 
   Methods
   -------
-  recommend
+
 
   Raises
   ------
@@ -28,41 +32,41 @@ class Session:
     Each session also has its own recommendation engine object which contains the 'analyzed' data files and is central to recommendations.
   """
 
-  configMgr = None
-  sessionId = None
-  filename = None
-  recEngine = None
+  configMgr: cm.ConfigMgr = None
+  sessionId: str = None
+  filename: str = None
+  recEngine: eng.Engine = None
 
-  def __init__(self, configManager):
+  def __init__(self, configManager: cm.ConfigMgr):
     self.configMgr = configManager
 
   # ----
   # Generates and returns new session identifier.
   # ----
-  def getNewSID(self):
+  def getNewSID(self) -> str:
     self.sessionId = uuid.uuid4().hex
     return self.sessionId
   
   # ----
   # Stores the filename of the configuration associated with this session.
   # ----
-  def setFilename(self, filename):
+  def setFilename(self, filename: str):
     self.filename = filename
 
   # ----
   # Retrieves the configuration manager associated with this session.
   # ----
-  def getConfigMgr(self):
+  def getConfigMgr(self) -> cm.ConfigMgr:
     return self.configMgr
 
   # ----
   # Sets the recommendation engine associated with this session.
   # ----
-  def setRecEngine(self, recEngine):
+  def setRecEngine(self, recEngine: eng.Engine):
     self.recEngine = recEngine
 
   # ----
   # Retrieves the recommendation engine associated with this session.
   # ----
-  def getRecEngine(self):
+  def getRecEngine(self) -> eng.Engine:
     return self.recEngine

@@ -6,18 +6,20 @@ from appManagement import message as mes
 from appManagement import audit as au
 from appManagement import workingColumn as wc
 from appManagement import combineColumn as cc
+from typing import List
+from dataclasses import dataclass
 
 class DataFile:
     jsonObj = None          # result of the json.loads operation
-    uploadFolder = None     # the upload file path
-    audit = []              # the audit instance
+    uploadFolder: str = None     # the upload file path
+    audit: au.Audit              # the audit instance
     data = None             # Dataframe from pandas.read_csv
-    workingColumns = []     # collection of WorkingColumn objects
-    combineColumns = []     # collection of CombineColumn objects
-    na_filter = True
-    error_bad_lines = False
+    workingColumns = List[wc.WorkingColumn]     # collection of WorkingColumn objects
+    combineColumns = List[cc.CombineColumn]     # collection of CombineColumn objects
+    na_filter: bool = True
+    error_bad_lines: bool = False
 
-    def __init__(self, dataObject, uploadFolder, audit):
+    def __init__(self, dataObject, uploadFolder: str, audit: au.Audit):
         self.jsonObj = dataObject
         self.uploadFolder = uploadFolder
         self.audit = audit

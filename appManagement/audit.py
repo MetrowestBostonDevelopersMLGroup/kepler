@@ -1,6 +1,9 @@
 from appManagement import message as msg
 import pandas as pd
+from typing import List
+from dataclasses import dataclass
 
+@dataclass
 class Audit:
     """
     This class contains 'staticly' defined instances which represent the parsing and other processing failures or warnings that occur
@@ -28,11 +31,11 @@ class Audit:
     """
 
 
-    messages = []                # contains the collection of audit messages
-    isErrorEncountered = False   # set to True when the first error message is added to the audit collection.
+    messages = List[msg.Message]       # contains the collection of audit messages
+    isErrorEncountered: bool = False   # set to True when the first error message is added to the audit collection.
 
     # info messages 0 - 2000
-    INFO_START_AUDIT = msg.Message(0, 'Start audit.', 'Info')
+    INFO_START_AUDIT = msg.Message(0, 'The audit process has started...', 'Info')
     
     # warning messages 2001 - 4001
     WARNING_FILE_SECTION_DOES_NOT_CONTAIN_NA_FILTER = msg.Message(2001, 'One of the file sections does not define an na-filter property, a value of TRUE will be defaulted. See pandas.read_csv docs.','Warning')
@@ -114,7 +117,7 @@ class Audit:
     #   message - is one of the message constant instances defined at the top of this file
     #   extra - any additional information that is necessary to provide context to the message
     # ----
-    def AddMessage(self, message, extra):
+    def AddMessage(self, message: msg.Message, extra: str):
         if (message.level =='Error'):
             self.isErrorEncountered = True
 
@@ -125,13 +128,13 @@ class Audit:
     # ----
     # Identifies if any error-level messages have been added to the audit collection.
     # ----
-    def IsErrorInAudit(self):
+    def IsErrorInAudit(self) -> bool:
         return self.isErrorEncountered
 
     # ----
     # Returns the audit message collection as an easy to view HTML table.
     # ----
-    def MessagesAsHtmlTable(self):
+    def MessagesAsHtmlTable(self) -> str:
         df = pd.DataFrame([t.__dict__ for t in self.messages ])
         return df.to_html()
 
