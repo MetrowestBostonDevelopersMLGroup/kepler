@@ -92,13 +92,6 @@ def hello():
     print("hello world")
     return app.send_static_file("index.html")
 
-@app.route("/all")
-def all():    #movie_title
-    load()
-    transform()
-    data = recommend()
-    return data.to_html()
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
