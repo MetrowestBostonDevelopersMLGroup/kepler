@@ -2,6 +2,8 @@ import os
 import json, pathlib
 from flask import jsonify
 from engine import engine as eng
+from appManagement import configMgr as cm
+from appManagement import session as se
 from dataclasses import dataclass
 
 @dataclass
@@ -65,6 +67,13 @@ class AppMethods:
         return result.to_json(orient="split")
 
     # ----
+    # Retrieves the configuration manager associated with the session
+    # ----
+    def getConfigureObject(self, sessionId: str, prompt: str) -> cm.ConfigMgr:
+        session = self.sessions[sessionId]        
+        return session.getConfigMgr()
+
+    # ----
     # Returns a list of .cfg files that are uploaded to the recommendation system
     # ----
     def listUploadedConfigurations(self) -> list:
@@ -79,3 +88,15 @@ class AppMethods:
                 config_files.append(f)
 
         return config_files
+
+    # ----
+    # Given a session id, returns the associated session
+    # ----
+    def getSession(self, sessionId: str) -> se.Session:
+        return self.sessions[sessionId]
+
+    # ----
+    # Get upload folder
+    # ----
+    def getUploadFolder(self) -> str:
+        return self.uploadFolder
