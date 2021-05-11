@@ -1,9 +1,12 @@
 from appManagement import audit as au
-from appManagement import configMgr 
+from appManagement import configMgr as cm
+from appManagement import dataFile as df
 from engine import transform as xf
 from engine import analyze as az
 import pandas as pd
+from dataclasses import dataclass
 
+@dataclass
 class Engine:
     """
     Given a configuration manager instance, this object will organize:
@@ -35,11 +38,11 @@ class Engine:
     ------------------
     """
 
-    configurationMgr = None
-    transform = None
-    analyze = None
+    configurationMgr: cm.ConfigMgr = None
+    transform: xf.Transform = None
+    analyze: az.Analyze = None
     similarity = None
-    finalDataObj = None
+    finalDataObj: df.DataFile = None
 
     def __init__(self, configurationManager):
         self.configurationMgr = configurationManager
@@ -47,6 +50,12 @@ class Engine:
         self.analyze = az.Analyze()
         self.similarity = None
         self.finalDataObj = None
+
+    # ---
+    # Returns the associated transform object
+    # ---
+    def getTransform(self) -> xf.Transform:
+        return self.transform
 
     # ---
     # Performs the loading, parsing and processing of the data files making the system available to issue recommendations.
@@ -62,6 +71,8 @@ class Engine:
 
         for file in files:
             file.CombineColumns()        
+
+        self.finalDataObj.WriteWorkingDataFile()
 
         self.similarity = self.analyze.VectorizeAndSimilarity(self.configurationMgr, self.finalDataObj)
 

@@ -1,12 +1,13 @@
 """The Endpoints to manage the BOOK_REQUESTS"""
 import uuid
 from datetime import datetime, timedelta
-from flask import jsonify, abort, request, Blueprint, current_app, flash, redirect
+from flask import jsonify, abort, request, Blueprint, current_app, flash, redirect, send_from_directory
 from appManagement import session as sess
 import argparse
 import os
 from werkzeug.utils import secure_filename
 from appManagement import configMgr as cmgr
+from engine import transform as tf
 
 from validate_email import validate_email
 
@@ -88,3 +89,11 @@ def configRecommend():
     response = current_app.appMethods.configRecommend(data['sessionId'], data['prompt'])
     return response
 
+@KEPLER_API.route('/v1/downloadWorkingData/<string:_sessionId>', methods=['GET'])
+def downloadWorkingData(_sessionId):
+    session = current_app.appMethods.getSession(_sessionId)
+    if session.getRecEngine() is None:
+        abort(404)
+    transform =  session.getRecEngine().getTransform()
+    uploads = os.path.join(current_app.root_path+'/', current_app.appMethods.getUploadFolder()[1:]) # correct the path partials to join
+    return send_from_directory(directory=uploads, filename=transform.GetWorkingDataFile().GetWorkingDataFilename())

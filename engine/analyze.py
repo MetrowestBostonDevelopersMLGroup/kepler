@@ -4,7 +4,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from appManagement import analyzeInstructions as ai
 from appManagement import configMgr 
+from dataclasses import dataclass
 
+@dataclass
 class Analyze:
     """
     Provides the engine with data analysis capability, specifically:

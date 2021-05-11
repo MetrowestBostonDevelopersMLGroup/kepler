@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+@dataclass
 class Message:
     """
     This file contains the properties that represent a message that is created as the result of

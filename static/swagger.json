@@ -137,10 +137,46 @@
           }
         }
       }
+    },
+
+
+    "/v1/downloadWorkingData/{sessionId}": {
+      "get": {
+        "tags": [
+          "Recommendation"
+        ],
+        "summary": "Retrieves the working data file",
+
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "description": "Session Identifier",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        }
+      }
     }
+
   },
   "components": {
     "schemas": {
+      "id": {
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },      
       "loadConfigRequestPostBody": {
         "type": "object",
         "properties": {

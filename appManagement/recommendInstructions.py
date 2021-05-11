@@ -1,4 +1,5 @@
 from typing import List
+from dataclasses import dataclass
 
 """
 This file contains classes which are initialized with the information from the
@@ -14,6 +15,7 @@ Notes and Examples
 ------------------
 """
 
+@dataclass
 class RecommendColumn:
     sourceColumn: str = None
     outputColumn: str = None
@@ -22,6 +24,7 @@ class RecommendColumn:
         self.sourceColumn = None
         self.outputColumn = None
 
+@dataclass
 class Recommend:
     requestColumn: str = None
     responseCount: int = None

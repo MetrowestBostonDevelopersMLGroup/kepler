@@ -13,7 +13,7 @@ class DataFile:
     jsonObj = None          # result of the json.loads operation
     uploadFolder: str = None     # the upload file path
     audit: au.Audit              # the audit instance
-    data = None             # Dataframe from pandas.read_csv
+    data: pd.core.frame.DataFrame =  None             # Dataframe from pandas.read_csv
     workingColumns = List[wc.WorkingColumn]     # collection of WorkingColumn objects
     combineColumns = List[cc.CombineColumn]     # collection of CombineColumn objects
     na_filter: bool = True
@@ -197,6 +197,30 @@ class DataFile:
     def LoadData(self):
         self.data = pd.read_csv(self.uploadFolder+'/'+self.GetFilename(), na_filter=self.GetNAFilter(), error_bad_lines = self.GetErrorBadLines())
     
+    # ----
+    # Writes the current dataframe to disk as the 'working' data file.
+    # ----    
+    def WriteWorkingDataFile(self):
+        self.data.to_csv(self.uploadFolder+'/'+'working_'+self.GetFilename())
+
+    # ----
+    # Retrieves the path to the disk file for the 'working' data file.
+    # ----    
+    def GetWorkingDataFilePath(self) -> str:
+        return self.uploadFolder+'/'+'working_'+self.GetFilename()
+
+    # ----
+    # Retrieves the upload path.
+    # ----    
+    def GetUploadPath(self) -> str:
+        return self.uploadFolder+'/'
+
+    # ----
+    # Retrieves the upload path.
+    # ----    
+    def GetWorkingDataFilename(self) -> str:
+        return 'working_'+self.GetFilename()
+
     # ----
     # Returns the filename from the JSON object
     # ----
