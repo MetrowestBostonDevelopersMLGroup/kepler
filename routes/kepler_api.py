@@ -1,4 +1,4 @@
-"""The Endpoints to manage the BOOK_REQUESTS"""
+"""The Endpoints to manage recommendations"""
 import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint, current_app, flash, redirect, send_from_directory
@@ -18,7 +18,9 @@ def get_blueprint():
     """Return the blueprint for the main app module"""
     return KEPLER_API
 
-
+# ---
+# Returns a list of all uploaded configuration files.
+# ---
 @KEPLER_API.route('/v1/configuration', methods=['GET'])
 def get_configurations():
     """Return all loaded configurations
