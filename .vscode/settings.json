@@ -7,5 +7,11 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "upload" : true        
-    }
+    },
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
 }
