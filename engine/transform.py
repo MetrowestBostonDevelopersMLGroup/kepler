@@ -1,8 +1,6 @@
 from appManagement import dataFile as df
 from appManagement import configMgr as cf
-from dataclasses import dataclass
 
-@dataclass
 class Transform:
     """
     Provides the engine with data transformation capability, specifically:

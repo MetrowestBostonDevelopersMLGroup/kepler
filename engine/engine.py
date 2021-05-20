@@ -4,9 +4,7 @@ from appManagement import dataFile as df
 from engine import transform as xf
 from engine import analyze as az
 import pandas as pd
-from dataclasses import dataclass
 
-@dataclass
 class Engine:
     """
     Given a configuration manager instance, this object will organize:

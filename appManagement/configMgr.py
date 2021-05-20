@@ -1,15 +1,13 @@
 import pandas as pd
 import json
 from flask import jsonify
-from typing import List
+from typing import List, Tuple
 from appManagement import dataFile as df
 from appManagement import transformInstructions as ti
 from appManagement import analyzeInstructions as vi
 from appManagement import recommendInstructions as ri
 from appManagement import audit as au
-from dataclasses import dataclass
 
-@dataclass
 class ConfigMgr:
     """
     The heart and soul of the configuration file parsing system. An instance of this object contains the object-model which
@@ -52,7 +50,7 @@ class ConfigMgr:
     # ----
     # Load the configuration file specified by configJson parameter and parse
     # ----
-    def LoadAndParse(self, configJson: str) -> (str, bool):       
+    def LoadAndParse(self, configJson: str) -> Tuple[str, bool]:       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         with open(configJson) as f:
@@ -72,7 +70,7 @@ class ConfigMgr:
     # ----
     # Given the configuration JSON specified by the content parameter, parse the configuration
     # ----
-    def Parse(self, content: str) -> (str, bool):       
+    def Parse(self, content: str) -> Tuple[str, bool]:       
         self.audit.ClearMessages() 
         self.audit.AddMessage(au.Audit.INFO_START_AUDIT,'')
         

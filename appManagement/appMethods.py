@@ -4,9 +4,7 @@ from flask import jsonify
 from engine import engine as eng
 from appManagement import configMgr as cm
 from appManagement import session as se
-from dataclasses import dataclass
 
-@dataclass
 class AppMethods:
     """
     Provides access to REST endpoints of the functionality which is present in the application object 'app'.
