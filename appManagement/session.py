@@ -1,9 +1,7 @@
 import uuid
 from appManagement import configMgr as cm
 from engine import engine as eng
-from dataclasses import dataclass
 
-@dataclass
 class Session:
   """
   Provides a place to store session information for the REST endpoints.
