@@ -1,9 +1,11 @@
 import pandas as pd
+from typing import List, Tuple
 import scipy.sparse as sp
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from appManagement import analyzeInstructions as ai
 from appManagement import configMgr 
+import numpy
 
 class Analyze:
     """
@@ -38,7 +40,7 @@ class Analyze:
     # ---
     # Performs the analysis of the supplied data.
     # ---
-    def VectorizeAndSimilarity(self, configMgr: configMgr.ConfigMgr, workingDatafile: str):
+    def VectorizeAndSimilarity(self, configMgr: configMgr.ConfigMgr, workingDatafile: str) -> numpy.ndarray:
         
         matrixlist = []
         for vec in configMgr.analyze.vectorizers:
@@ -74,7 +76,7 @@ class Analyze:
     # ---
     # Given a request, returns the associate recommendation or empty set.
     # ---
-    def Recommend(self, configMgr: configMgr.ConfigMgr, workingData, columnName: str, request: str):
+    def Recommend(self, configMgr: configMgr.ConfigMgr, workingData, columnName: str, request: str)-> Tuple[pd.DataFrame, bool]:  
 
         indices = pd.Series(workingData.index, index = workingData[columnName])
         try:

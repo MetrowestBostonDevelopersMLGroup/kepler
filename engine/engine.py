@@ -1,9 +1,11 @@
+from typing import List, Tuple
 from appManagement import audit as au
 from appManagement import configMgr as cm
 from appManagement import dataFile as df
 from engine import transform as xf
 from engine import analyze as az
 import pandas as pd
+import numpy
 
 class Engine:
     """
@@ -58,7 +60,7 @@ class Engine:
     # ---
     # Performs the loading, parsing and processing of the data files making the system available to issue recommendations.
     # ---
-    def Execute(self):
+    def Execute(self) -> numpy.ndarray:
         
         files = self.configurationMgr.DataFiles()
         for file in files:
@@ -79,7 +81,7 @@ class Engine:
     # ---
     # Accepts a request and provides a recommendation, or empty set.
     # ---
-    def Recommendation(self, request: str):
+    def Recommendation(self, request: str) -> Tuple[pd.DataFrame, bool]:  
 
         recommendation = self.analyze.Recommend(self.configurationMgr, self.finalDataObj.data, self.configurationMgr.recommend.requestColumn, request) #'Amavas') #'Aliens')
 

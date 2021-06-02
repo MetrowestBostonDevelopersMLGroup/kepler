@@ -7,6 +7,7 @@ from appManagement import transformInstructions as ti
 from appManagement import analyzeInstructions as vi
 from appManagement import recommendInstructions as ri
 from appManagement import audit as au
+from appManagement import message as msg
 
 class ConfigMgr:
     """
@@ -89,8 +90,9 @@ class ConfigMgr:
     # ----
     # Retrieve the associated audit messages.
     # ----
-    def GetAudit(self) -> list:
+    def GetAudit(self) -> List[msg.Message]:
         return self.audit.messages
+
     # ----
     # Determines if there is an error in the audit message collection.
     # ----
@@ -99,6 +101,7 @@ class ConfigMgr:
         if len(audit) > 0:
             return True
         return False
+        
     # ----
     # Private method, top of the chain to parse the configuration.
     # ----
