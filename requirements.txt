@@ -6,3 +6,4 @@ pandas
 scipy
 sklearn
 werkzeug
+pytest-mock
