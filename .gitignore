@@ -134,3 +134,4 @@ dmypy.json
 encoder/
 fastText/
 InferSent/
+glove/
